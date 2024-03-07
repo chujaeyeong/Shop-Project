@@ -28,6 +28,7 @@ out/
 
 ### application ###
 application.yml
+application-test.yml
 application.properties
 
 ### NetBeans ###

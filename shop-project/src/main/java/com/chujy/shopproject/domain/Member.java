@@ -37,7 +37,7 @@ public class Member {
         Member member = new Member();
         member.setName(memberFormDto.getName());
         member.setEmail(memberFormDto.getEmail());
-        member.setAddress(member.getAddress());
+        member.setAddress(memberFormDto.getAddress());
 
         // BCryptPasswordEncoder Bean 을 파라미터로 넘겨서 패스워드 암호화
         String password = passwordEncoder.encode(memberFormDto.getPassword());

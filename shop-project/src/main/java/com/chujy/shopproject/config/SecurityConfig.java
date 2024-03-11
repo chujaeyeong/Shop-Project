@@ -1,6 +1,7 @@
 package com.chujy.shopproject.config;
 
 import com.chujy.shopproject.service.MemberService;
+import jakarta.servlet.DispatcherType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,6 +33,19 @@ public class SecurityConfig {
                         .invalidateHttpSession(true))   // 기존에 생성된 사용자 세션도 invalidateHttpSession 을 통해 삭제하도록 처리
         ;
 
+        // 특정 URL에 대한 권한 설정
+        // permitAll() : 모든 사용자가 인증(로그인) 없이 해당 경로에 접근
+        // hasRole("ADMIN") : /admin 으로 시작하는 경로는 ADMIN Role 일 경우에만 접근 가능
+        // 명시한 나머지 경로는 모두 인증을 요구하도록 설정
+        http.authorizeHttpRequests((authorizeRequests) -> {
+            authorizeRequests
+                    .requestMatchers("/css/**", "/js/**", "/img/**").permitAll()
+                    .requestMatchers("/", "/members/**", "/item/**", "/images/**").permitAll()
+                    .requestMatchers("/admin/**").hasRole("ADMIN")
+                    .anyRequest().authenticated();
+        });
+
+        // 인증되지 않은 사용자가 리소스에 접근하였을 때 수행되는 핸들러 등록
         http.exceptionHandling(authenticationManager -> authenticationManager
                 .authenticationEntryPoint(new CustomAuthenticationEntryPoint()));
 

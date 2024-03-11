@@ -50,6 +50,9 @@ dependencies {
 	// validation 추가
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 
+	// spring security test 추가
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
 }
 
 tasks.named('test') {

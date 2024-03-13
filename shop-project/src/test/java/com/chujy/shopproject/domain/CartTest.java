@@ -5,6 +5,7 @@ import com.chujy.shopproject.repository.CartRepository;
 import com.chujy.shopproject.repository.MemberRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +31,7 @@ class CartTest {
     @Autowired
     PasswordEncoder passwordEncoder;
 
-    @Autowired
+    @PersistenceContext
     EntityManager em;
 
     public Member createMember() {

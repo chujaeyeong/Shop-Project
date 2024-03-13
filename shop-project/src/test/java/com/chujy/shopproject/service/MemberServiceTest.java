@@ -3,6 +3,7 @@ package com.chujy.shopproject.service;
 import com.chujy.shopproject.domain.Member;
 import com.chujy.shopproject.dto.MemberFormDto;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,7 +21,7 @@ import static org.assertj.core.api.Assertions.*;
 @Rollback
 class MemberServiceTest {
 
-    @Autowired
+    @PersistenceContext
     EntityManager em;
 
     @Autowired

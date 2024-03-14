@@ -15,14 +15,14 @@ public class FileService {
         UUID uuid = UUID.randomUUID();          // 파일명 중복 문제 해결
 
         String extension = originalFileName.substring(originalFileName.lastIndexOf("."));
-        String saveFileName = uuid.toString() + extension;
-        String fileUploadFullUrl = uploadPath + "/" + saveFileName;
+        String savedFileName = uuid.toString() + extension;
+        String fileUploadFullUrl = uploadPath + "/" + savedFileName;
 
         FileOutputStream fos = new FileOutputStream(fileUploadFullUrl);     // 파일 출력 스트림을 만든다
         fos.write(fileData);                    // fileData 를 파일 출력 스트림에 입력
         fos.close();
 
-        return saveFileName;
+        return savedFileName;
     }
 
     public void deleteFile(String filePath) throws Exception {

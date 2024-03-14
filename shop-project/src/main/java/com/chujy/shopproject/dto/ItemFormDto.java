@@ -31,6 +31,8 @@ public class ItemFormDto {
 
     private ItemSellStatus itemSellStatus;
 
+    private List<ItemImgDto> itemImgDtoList = new ArrayList<>();
+
     private List<Long> itemImgIds = new ArrayList<>();      // 수정 시에 이미지 아이디를 담아두는 용도로 사용 예정
 
     private static ModelMapper modelMapper = new ModelMapper();

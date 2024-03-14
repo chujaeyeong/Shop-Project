@@ -22,12 +22,13 @@ public class ItemService {
     private final ItemImgService itemImgService;
 
     public Long saveItem(ItemFormDto itemFormDto, List<MultipartFile> itemImgFileList) throws Exception {
-        // 상품 등록
+
+        //상품 등록
         Item item = itemFormDto.createItem();
         itemRepository.save(item);
 
-        // 이미지 등록
-        for (int i = 0; i < itemImgFileList.size(); i++) {
+        //이미지 등록
+        for(int i = 0; i < itemImgFileList.size(); i++) {
             ItemImg itemImg = new ItemImg();
             itemImg.setItem(item);
 

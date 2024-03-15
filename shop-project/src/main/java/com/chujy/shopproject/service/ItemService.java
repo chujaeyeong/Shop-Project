@@ -4,10 +4,13 @@ import com.chujy.shopproject.domain.Item;
 import com.chujy.shopproject.domain.ItemImg;
 import com.chujy.shopproject.dto.ItemFormDto;
 import com.chujy.shopproject.dto.ItemImgDto;
+import com.chujy.shopproject.dto.ItemSearchDto;
 import com.chujy.shopproject.repository.ItemImgRepository;
 import com.chujy.shopproject.repository.ItemRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -77,6 +80,11 @@ public class ItemService {
         }
 
         return item.getId();
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Item> getAdminItemPage(ItemSearchDto itemSearchDto, Pageable pageable) {
+        return itemRepository.getAdminItemPage(itemSearchDto, pageable);
     }
 
 }

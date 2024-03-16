@@ -5,6 +5,7 @@ import com.chujy.shopproject.domain.ItemImg;
 import com.chujy.shopproject.dto.ItemFormDto;
 import com.chujy.shopproject.dto.ItemImgDto;
 import com.chujy.shopproject.dto.ItemSearchDto;
+import com.chujy.shopproject.dto.MainItemDto;
 import com.chujy.shopproject.repository.ItemImgRepository;
 import com.chujy.shopproject.repository.ItemRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -85,6 +86,11 @@ public class ItemService {
     @Transactional(readOnly = true)
     public Page<Item> getAdminItemPage(ItemSearchDto itemSearchDto, Pageable pageable) {
         return itemRepository.getAdminItemPage(itemSearchDto, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<MainItemDto> getMainItemPage(ItemSearchDto itemSearchDto, Pageable pageable) {
+        return itemRepository.getMainItemPage(itemSearchDto, pageable);
     }
 
 }

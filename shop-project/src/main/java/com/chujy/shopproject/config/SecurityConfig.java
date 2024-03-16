@@ -39,6 +39,7 @@ public class SecurityConfig {
         // 명시한 나머지 경로는 모두 인증을 요구하도록 설정
         http.authorizeHttpRequests((authorizeRequests) -> {
             authorizeRequests
+                    .requestMatchers("/favicon.ico", "/error").permitAll()
                     .requestMatchers("/css/**", "/js/**", "/img/**").permitAll()
                     .requestMatchers("/", "/members/**", "/item/**", "/images/**").permitAll()
                     .requestMatchers("/admin/**").hasRole("ADMIN")

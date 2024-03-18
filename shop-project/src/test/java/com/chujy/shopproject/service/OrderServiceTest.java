@@ -1,6 +1,7 @@
 package com.chujy.shopproject.service;
 
 import com.chujy.shopproject.constant.ItemSellStatus;
+import com.chujy.shopproject.constant.OrderStatus;
 import com.chujy.shopproject.domain.Item;
 import com.chujy.shopproject.domain.Member;
 import com.chujy.shopproject.domain.Order;
@@ -71,6 +72,24 @@ class OrderServiceTest {
         int totalPrice = orderDto.getCount() * item.getPrice();
 
         assertEquals(totalPrice, order.getTotalPrice());
+    }
+
+    @Test
+    @DisplayName("주문 취소 테스트")
+    public void cancelOrder() {
+        Item item = saveItem();
+        Member member = saveMember();
+
+        OrderDto orderDto = new OrderDto();
+        orderDto.setCount(100);
+        orderDto.setItemId(item.getId());
+        Long orderId = orderService.order(orderDto, member.getEmail());
+
+        Order order = orderRepository.findById(orderId).orElseThrow(EntityNotFoundException::new);
+        orderService.cancelOrder(orderId);
+
+        assertEquals(OrderStatus.CANCEL, order.getOrderStatus());
+        assertEquals(100, item.getStockNumber());
     }
 
 }

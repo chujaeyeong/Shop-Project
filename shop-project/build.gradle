@@ -57,6 +57,14 @@ dependencies {
 	// modelmapper 라이브러리 추가
 	implementation 'org.modelmapper:modelmapper:3.1.0'
 
+	// OAuth2 client 의존성 추가
+	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+
+	// JWT 0.12.3 의존성 추가
+	implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
+	implementation 'io.jsonwebtoken:jjwt-impl:0.12.3'
+	implementation 'io.jsonwebtoken:jjwt-jackson:0.12.3'
+
 }
 
 tasks.named('test') {

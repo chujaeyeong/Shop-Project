@@ -5,13 +5,13 @@ import com.chujy.shopproject.service.MemberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
@@ -19,7 +19,7 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 public class SecurityConfig {
 
     @Autowired
-    MemberService memberService;
+    private MemberService memberService;
 
     private final CustomOAuth2UserService customOAuth2UserService;
 
@@ -28,12 +28,24 @@ public class SecurityConfig {
     }
 
     @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public AuthenticationFailureHandler customAuthenticationFailureHandler() {
+        return new CustomAuthenticationFailureHandler();
+    }
+
+    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.formLogin((formLogin) -> formLogin
                         .usernameParameter("email")    // 로그인 시 사용할 파라미터로 email 을 사용
                         .failureUrl("/members/login/error")     // 로그인 실패 시 이동할 페이지
                         .loginPage("/members/login")    // 로그인 페이지 설정
+                        .failureHandler(customAuthenticationFailureHandler())       // 로그인 실패 시 로그 출력을 위한 설정
                         .defaultSuccessUrl("/"))        // 로그인 성공시 이동할 페이지
+
                 .logout((logout) -> logout
                         .logoutRequestMatcher(new AntPathRequestMatcher("/members/logout"))     // 로그아웃 url 설정
                         .logoutSuccessUrl("/")          // 로그아웃 성공 시 이동할 url
@@ -57,32 +69,29 @@ public class SecurityConfig {
         http.exceptionHandling(authenticationManager -> authenticationManager
                 .authenticationEntryPoint(new CustomAuthenticationEntryPoint()));
 
-        // OAuth2 추가 설정
-        //csrf disable
-//        http
-//                .csrf(AbstractHttpConfigurer::disable);
+        // OAuth2 설정
+        http.oauth2Login(oauth2Login -> oauth2Login
+                .userInfoEndpoint(userInfo -> userInfo
+                        .userService(customOAuth2UserService) // OAuth2 사용자 서비스 설정
+                )
+                .loginPage("/members/login")
+                .successHandler((request, response, authentication) -> {
+                    // 로그인 성공 후의 추가 작업을 여기에 구현
+                    // 예: 사용자 리디렉션, 세션 설정 등
+                    response.sendRedirect("/"); // 로그인 성공 시 리디렉션 할 주소
+                })
+        );
 
-        //HTTP Basic 인증 방식 disable
-        http
-                .httpBasic(AbstractHttpConfigurer::disable);
-
-        //oauth2
-        http
-                .oauth2Login((oauth2) -> oauth2
-                        .userInfoEndpoint(userInfoEndpointConfig -> userInfoEndpointConfig
-                                .userService(customOAuth2UserService)));
-
-        //세션 설정 : STATELESS
-        http
-                .sessionManagement((session) -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-
+        http.authenticationProvider(authenticationProvider());
 
         return http.build();
     }
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+    public DaoAuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(memberService);
+        authProvider.setPasswordEncoder(passwordEncoder());
+        return authProvider;
     }
+
 }

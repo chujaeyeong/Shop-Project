@@ -3,12 +3,14 @@ package com.chujy.shopproject.domain;
 import com.chujy.shopproject.constant.Role;
 import com.chujy.shopproject.dto.SocialMemberDto;
 import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
+@DiscriminatorValue("SocialMember")
 @Table(name = "social_member")
 @Getter
 @Setter

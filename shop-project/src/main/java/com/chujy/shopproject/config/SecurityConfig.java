@@ -1,7 +1,11 @@
 package com.chujy.shopproject.config;
 
+import com.chujy.shopproject.jwt.JWTFilter;
+import com.chujy.shopproject.jwt.JWTUtil;
+import com.chujy.shopproject.oauth2.CustomSuccessHandler;
 import com.chujy.shopproject.service.CustomOAuth2UserService;
 import com.chujy.shopproject.service.MemberService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,7 +16,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+
+import java.util.Collections;
 
 @Configuration
 @EnableWebSecurity
@@ -22,9 +31,16 @@ public class SecurityConfig {
     private MemberService memberService;
 
     private final CustomOAuth2UserService customOAuth2UserService;
+    private final CustomSuccessHandler customSuccessHandler;
+    private final JWTUtil jwtUtil;
 
-    public SecurityConfig(CustomOAuth2UserService customOAuth2UserService) {
+    public SecurityConfig(CustomOAuth2UserService customOAuth2UserService,
+                          CustomSuccessHandler customSuccessHandler,
+                          JWTUtil jwtUtil) {
+
         this.customOAuth2UserService = customOAuth2UserService;
+        this.customSuccessHandler = customSuccessHandler;
+        this.jwtUtil = jwtUtil;
     }
 
     @Bean
@@ -39,6 +55,28 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
+        http
+                .cors(corsCustomizer -> corsCustomizer.configurationSource(new CorsConfigurationSource() {
+
+                    @Override
+                    public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+
+                        CorsConfiguration configuration = new CorsConfiguration();
+
+                        configuration.setAllowedOrigins(Collections.singletonList("http://localhost:8080"));
+                        configuration.setAllowedMethods(Collections.singletonList("*"));
+                        configuration.setAllowCredentials(true);
+                        configuration.setAllowedHeaders(Collections.singletonList("*"));
+                        configuration.setMaxAge(3600L);
+
+                        configuration.setExposedHeaders(Collections.singletonList("Set-Cookie"));
+                        configuration.setExposedHeaders(Collections.singletonList("Authorization"));
+
+                        return configuration;
+                    }
+                }));
+
         http.formLogin((formLogin) -> formLogin
                         .usernameParameter("email")    // 로그인 시 사용할 파라미터로 email 을 사용
                         .failureUrl("/members/login/error")     // 로그인 실패 시 이동할 페이지
@@ -69,17 +107,18 @@ public class SecurityConfig {
         http.exceptionHandling(authenticationManager -> authenticationManager
                 .authenticationEntryPoint(new CustomAuthenticationEntryPoint()));
 
+        // JWTFilter 추가
+        http
+                .addFilterBefore(new JWTFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
+
+
         // OAuth2 설정
         http.oauth2Login(oauth2Login -> oauth2Login
                 .userInfoEndpoint(userInfo -> userInfo
                         .userService(customOAuth2UserService) // OAuth2 사용자 서비스 설정
                 )
                 .loginPage("/members/login")
-                .successHandler((request, response, authentication) -> {
-                    // 로그인 성공 후의 추가 작업을 여기에 구현
-                    // 예: 사용자 리디렉션, 세션 설정 등
-                    response.sendRedirect("/"); // 로그인 성공 시 리디렉션 할 주소
-                })
+                .successHandler(customSuccessHandler)
         );
 
         http.authenticationProvider(authenticationProvider());

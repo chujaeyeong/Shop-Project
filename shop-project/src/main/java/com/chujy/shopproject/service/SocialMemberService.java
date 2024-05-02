@@ -1,61 +1,58 @@
 package com.chujy.shopproject.service;
 
+import com.chujy.shopproject.constant.Role;
 import com.chujy.shopproject.domain.Member;
 import com.chujy.shopproject.domain.SocialMember;
+import com.chujy.shopproject.dto.SocialMemberDto;
 import com.chujy.shopproject.repository.MemberRepository;
 import com.chujy.shopproject.repository.SocialMemberRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class SocialMemberService implements UserDetailsService {
+public class SocialMemberService {
 
     private final SocialMemberRepository socialMemberRepository;
     private final MemberRepository memberRepository;
 
-    public SocialMember saveSocialMember(SocialMember socialMember) {
-        validateDuplicateSocialMember(socialMember);
-        return socialMemberRepository.save(socialMember);
-    }
+    public SocialMember registerOrAuthenticateSocialMember(SocialMemberDto socialMemberDto) {
 
-    // 이미 가입한 회원일 경우 예외 발생
-    private void validateDuplicateSocialMember(SocialMember socialMember) {
-        SocialMember findSocialMember = socialMemberRepository.findBySnsId(socialMember.getSnsId());
-        if (findSocialMember != null) {
-            throw new IllegalStateException("이미 가입된 회원입니다.");
-        }
-    }
+        // SNS ID로 소셜 회원 조회
+        SocialMember socialMember = socialMemberRepository.findBySnsId(socialMemberDto.getSnsId())
+                .orElse(null);
 
-    @Override
-    public UserDetails loadUserByUsername(String snsId) throws UsernameNotFoundException {
-        SocialMember socialMember = socialMemberRepository.findBySnsId(snsId);
-
-        if (socialMember == null) {
-            throw new UsernameNotFoundException(snsId);
+        if (socialMember != null) {
+            // 이미 소셜 로그인을 한 적이 있는 회원이므로 로그인 처리
+            return socialMember;
         }
 
-        // SNS 플랫폼에서 받는 email 조회
-        String email = socialMember.getEmail();
+        else {
+            // 이메일로 일반 회원 조회
+            Member existingMember = memberRepository.findByEmail(socialMemberDto.getEmail());
 
-        // email을 통해 일반 사용자인지 확인
-        if (email != null) {
-            Member existingMember = memberRepository.findByEmail(email);
             if (existingMember != null) {
-                throw new IllegalStateException("이미 가입된 회원입니다.");
+                // 이미 일반 회원으로 가입된 경우
+                throw new AlreadyRegisteredException("이미 일반 회원으로 가입되어 있습니다.");
+            }
+
+            else {
+                // 소셜 로그인이 처음이므로 신규 등록
+                return registerNewSocialMember(socialMemberDto);
             }
         }
+    }
 
-        return User.builder()
-                .username(email)
-                .roles(socialMember.getRole().toString())
-                .build();
+    private SocialMember registerNewSocialMember(SocialMemberDto socialMemberDto) {
+        SocialMember newMember = new SocialMember();
+        newMember.setSnsId(socialMemberDto.getSnsId());
+        newMember.setEmail(socialMemberDto.getEmail());
+        newMember.setName(socialMemberDto.getName());
+        newMember.setAddress(socialMemberDto.getAddress());
+        newMember.setRole(Role.USER);
+        return socialMemberRepository.save(newMember);
     }
 
 }

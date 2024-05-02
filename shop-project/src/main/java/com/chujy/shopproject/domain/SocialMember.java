@@ -25,6 +25,7 @@ public class SocialMember extends Member {
         socialMember.setEmail(socialMemberDto.getEmail());
         socialMember.setName(socialMemberDto.getName());
         socialMember.setSnsId(socialMemberDto.getSnsId());
+        socialMember.setAddress(socialMemberDto.getAddress());
         socialMember.setRole(Role.USER);
 
         return socialMember;

@@ -1,8 +1,5 @@
 package com.chujy.shopproject.config;
 
-import com.chujy.shopproject.jwt.JWTFilter;
-import com.chujy.shopproject.jwt.JWTUtil;
-import com.chujy.shopproject.oauth2.CustomSuccessHandler;
 import com.chujy.shopproject.service.CustomOAuth2UserService;
 import com.chujy.shopproject.service.MemberService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,7 +13,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -31,16 +27,14 @@ public class SecurityConfig {
     private MemberService memberService;
 
     private final CustomOAuth2UserService customOAuth2UserService;
-    private final CustomSuccessHandler customSuccessHandler;
-    private final JWTUtil jwtUtil;
+//    private final CustomSuccessHandler customSuccessHandler;
+//    private final JWTUtil jwtUtil;
 
-    public SecurityConfig(CustomOAuth2UserService customOAuth2UserService,
-                          CustomSuccessHandler customSuccessHandler,
-                          JWTUtil jwtUtil) {
+    public SecurityConfig(CustomOAuth2UserService customOAuth2UserService) {
 
         this.customOAuth2UserService = customOAuth2UserService;
-        this.customSuccessHandler = customSuccessHandler;
-        this.jwtUtil = jwtUtil;
+//        this.customSuccessHandler = customSuccessHandler;
+//        this.jwtUtil = jwtUtil;
     }
 
     @Bean
@@ -107,19 +101,18 @@ public class SecurityConfig {
         http.exceptionHandling(authenticationManager -> authenticationManager
                 .authenticationEntryPoint(new CustomAuthenticationEntryPoint()));
 
-        // JWTFilter 추가
-        http
-                .addFilterBefore(new JWTFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
-
-
         // OAuth2 설정
         http.oauth2Login(oauth2Login -> oauth2Login
                 .userInfoEndpoint(userInfo -> userInfo
                         .userService(customOAuth2UserService) // OAuth2 사용자 서비스 설정
                 )
-                .loginPage("/members/login")
-                .successHandler(customSuccessHandler)
+                .loginPage("/members/login/oauth2/authorization/**")
+//                .successHandler(customSuccessHandler)
         );
+
+//        // JWTFilter 추가
+//        http
+//                .addFilterBefore(new JWTFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
 
         http.authenticationProvider(authenticationProvider());
 

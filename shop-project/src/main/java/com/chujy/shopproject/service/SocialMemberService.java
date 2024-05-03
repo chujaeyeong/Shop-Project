@@ -18,41 +18,37 @@ public class SocialMemberService {
     private final SocialMemberRepository socialMemberRepository;
     private final MemberRepository memberRepository;
 
-    public SocialMember registerOrAuthenticateSocialMember(SocialMemberDto socialMemberDto) {
+    public SocialMember registerOrAuthenticateSocialMember(SocialMemberDto socialMemberDto) throws AlreadyRegisteredException {
 
-        // SNS ID로 소셜 회원 조회
         SocialMember socialMember = socialMemberRepository.findBySnsId(socialMemberDto.getSnsId())
                 .orElse(null);
 
         if (socialMember != null) {
             // 이미 소셜 로그인을 한 적이 있는 회원이므로 로그인 처리
             return socialMember;
-        }
-
-        else {
-            // 이메일로 일반 회원 조회
+        } else {
             Member existingMember = memberRepository.findByEmail(socialMemberDto.getEmail());
-
             if (existingMember != null) {
                 // 이미 일반 회원으로 가입된 경우
                 throw new AlreadyRegisteredException("이미 일반 회원으로 가입되어 있습니다.");
-            }
-
-            else {
+            } else {
                 // 소셜 로그인이 처음이므로 신규 등록
                 return registerNewSocialMember(socialMemberDto);
             }
         }
+
     }
 
     private SocialMember registerNewSocialMember(SocialMemberDto socialMemberDto) {
-        SocialMember newMember = new SocialMember();
-        newMember.setSnsId(socialMemberDto.getSnsId());
-        newMember.setEmail(socialMemberDto.getEmail());
-        newMember.setName(socialMemberDto.getName());
-        newMember.setAddress(socialMemberDto.getAddress());
-        newMember.setRole(Role.USER);
+        SocialMember newMember = SocialMember.createSocialMember(socialMemberDto);
         return socialMemberRepository.save(newMember);
+    }
+
+    // 커스텀 예외 처리
+    public static class AlreadyRegisteredException extends RuntimeException {
+        public AlreadyRegisteredException(String message) {
+            super(message);
+        }
     }
 
 }

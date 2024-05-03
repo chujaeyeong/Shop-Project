@@ -57,6 +57,10 @@ dependencies {
 	// modelmapper 라이브러리 추가
 	implementation 'org.modelmapper:modelmapper:3.1.0'
 
+	// SLF4J 의존성 추가
+	implementation 'ch.qos.logback:logback-classic:1.4.12'
+	implementation 'org.slf4j:slf4j-api:2.0.3'
+
 }
 
 tasks.named('test') {

@@ -29,6 +29,13 @@
         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
     </form>
 
+    <!-- 소셜 로그인 버튼 추가 -->
+    <div class="social-buttons">
+        <h3>소셜 로그인:</h3>
+        <a href="/oauth2/authorization/google" class="btn btn-danger">Google 로그인</a>
+        <a href="/oauth2/authorization/naver" class="btn btn-success">Naver 로그인</a>
+    </div>
+
 </div>
 
 </html>

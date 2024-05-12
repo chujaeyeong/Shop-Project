@@ -62,15 +62,9 @@ dependencies {
 	implementation 'io.jsonwebtoken:jjwt-impl:0.12.3'
 	implementation 'io.jsonwebtoken:jjwt-jackson:0.12.3'
 
-<<<<<<< HEAD
-	// SLF4J 의존성 추가
-	implementation 'ch.qos.logback:logback-classic:1.4.12'
-	implementation 'org.slf4j:slf4j-api:2.0.3'
-
-=======
 	// OAuth2 client 의존성 추가
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
->>>>>>> main
+
 }
 
 tasks.named('test') {

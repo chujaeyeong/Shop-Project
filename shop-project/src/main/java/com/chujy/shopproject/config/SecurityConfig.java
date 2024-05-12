@@ -1,21 +1,24 @@
 package com.chujy.shopproject.config;
 
+<<<<<<< HEAD
 import com.chujy.shopproject.service.CustomOAuth2UserService;
+=======
+import com.chujy.shopproject.oauth.service.CustomOAuth2UserService;
+>>>>>>> main
 import com.chujy.shopproject.service.MemberService;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+<<<<<<< HEAD
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+=======
+>>>>>>> main
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
 
 import java.util.Collections;
 
@@ -24,9 +27,10 @@ import java.util.Collections;
 public class SecurityConfig {
 
     @Autowired
-    private MemberService memberService;
+    MemberService memberService;
 
     private final CustomOAuth2UserService customOAuth2UserService;
+<<<<<<< HEAD
 //    private final CustomSuccessHandler customSuccessHandler;
 //    private final JWTUtil jwtUtil;
 
@@ -45,39 +49,19 @@ public class SecurityConfig {
     @Bean
     public AuthenticationFailureHandler customAuthenticationFailureHandler() {
         return new CustomAuthenticationFailureHandler();
+=======
+    public SecurityConfig(CustomOAuth2UserService customOAuth2UserService) {
+        this.customOAuth2UserService = customOAuth2UserService;
+>>>>>>> main
     }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-
-        http
-                .cors(corsCustomizer -> corsCustomizer.configurationSource(new CorsConfigurationSource() {
-
-                    @Override
-                    public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
-
-                        CorsConfiguration configuration = new CorsConfiguration();
-
-                        configuration.setAllowedOrigins(Collections.singletonList("http://localhost:8080"));
-                        configuration.setAllowedMethods(Collections.singletonList("*"));
-                        configuration.setAllowCredentials(true);
-                        configuration.setAllowedHeaders(Collections.singletonList("*"));
-                        configuration.setMaxAge(3600L);
-
-                        configuration.setExposedHeaders(Collections.singletonList("Set-Cookie"));
-                        configuration.setExposedHeaders(Collections.singletonList("Authorization"));
-
-                        return configuration;
-                    }
-                }));
-
         http.formLogin((formLogin) -> formLogin
                         .usernameParameter("email")    // 로그인 시 사용할 파라미터로 email 을 사용
                         .failureUrl("/members/login/error")     // 로그인 실패 시 이동할 페이지
                         .loginPage("/members/login")    // 로그인 페이지 설정
-                        .failureHandler(customAuthenticationFailureHandler())       // 로그인 실패 시 로그 출력을 위한 설정
                         .defaultSuccessUrl("/"))        // 로그인 성공시 이동할 페이지
-
                 .logout((logout) -> logout
                         .logoutRequestMatcher(new AntPathRequestMatcher("/members/logout"))     // 로그아웃 url 설정
                         .logoutSuccessUrl("/")          // 로그아웃 성공 시 이동할 url
@@ -97,10 +81,17 @@ public class SecurityConfig {
                     .anyRequest().authenticated();
         });
 
+        // oauth2
+        http
+                .oauth2Login((oauth2) -> oauth2
+                        .userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
+                                .userService(customOAuth2UserService)));
+
         // 인증되지 않은 사용자가 리소스에 접근하였을 때 수행되는 핸들러 등록
         http.exceptionHandling(authenticationManager -> authenticationManager
                 .authenticationEntryPoint(new CustomAuthenticationEntryPoint()));
 
+<<<<<<< HEAD
         // OAuth2 설정
         http.oauth2Login(oauth2Login -> oauth2Login
                 .userInfoEndpoint(userInfo -> userInfo
@@ -116,14 +107,14 @@ public class SecurityConfig {
 
         http.authenticationProvider(authenticationProvider());
 
+=======
+>>>>>>> main
         return http.build();
     }
 
-    public DaoAuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(memberService);
-        authProvider.setPasswordEncoder(passwordEncoder());
-        return authProvider;
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 
 }

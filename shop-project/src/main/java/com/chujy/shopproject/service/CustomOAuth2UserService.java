@@ -3,6 +3,9 @@ package com.chujy.shopproject.service;
 import com.chujy.shopproject.domain.SocialMember;
 import com.chujy.shopproject.dto.*;
 import com.chujy.shopproject.repository.SocialMemberRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -12,34 +15,40 @@ import org.springframework.stereotype.Service;
 import java.util.Map;
 
 @Service
+@Slf4j
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
-    private final SocialMemberRepository socialMemberRepository;
+    private static final Logger logger = LoggerFactory.getLogger(CustomOAuth2UserService.class);
+    private final SocialMemberService socialMemberService;
 
-    public CustomOAuth2UserService(SocialMemberRepository socialMemberRepository) {
-        this.socialMemberRepository = socialMemberRepository;
+    public CustomOAuth2UserService(SocialMemberService socialMemberService) {
+        this.socialMemberService = socialMemberService;
     }
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-        OAuth2User oAuth2User = super.loadUser(userRequest);
-        String registrationId = userRequest.getClientRegistration().getRegistrationId();
 
-        OAuth2Response oAuth2Response = parseOAuth2Response(registrationId, oAuth2User.getAttributes());
+        logger.debug("Loading user from OAuth2UserRequest: {}", userRequest);
+        OAuth2User oAuth2User = super.loadUser(userRequest);
+        logger.debug("Loaded OAuth2User: {}", oAuth2User);
+
+        String registrationId = userRequest.getClientRegistration().getRegistrationId();
+        logger.debug("Registration ID: {}", registrationId);
+
+        Map<String, Object> attributes = oAuth2User.getAttributes();
+        logger.debug("OAuth2User attributes: {}", attributes);
+
+        OAuth2Response oAuth2Response = parseOAuth2Response(registrationId, attributes);
         String snsId = oAuth2Response.getProvider() + " " + oAuth2Response.getProviderId();
 
-        // 사용자 조회 후 존재하지 않으면 DTO 생성하여 반환
-        SocialMember existData = socialMemberRepository.findBySnsId(snsId);
-        if (existData == null) {
-            SocialMemberDto socialMemberDto = new SocialMemberDto();
-            socialMemberDto.setSnsId(snsId);
-            socialMemberDto.setName(oAuth2Response.getName());
-            socialMemberDto.setEmail(oAuth2Response.getEmail());
-            socialMemberDto.setRole("USER");
-            return new CustomOAuth2User(socialMemberDto);
-        }
+        SocialMemberDto socialMemberDto = new SocialMemberDto();
+        socialMemberDto.setEmail(oAuth2Response.getEmail());
+        socialMemberDto.setName(oAuth2Response.getName());
+        socialMemberDto.setSnsId(snsId);
+        socialMemberDto.setRole("USER");  // Default role 설정
 
-        return new CustomOAuth2User(mapToSocialMemberDto(existData));
+        SocialMember socialMember = socialMemberService.registerOrAuthenticateSocialMember(socialMemberDto);
+        return new CustomOAuth2User(socialMemberDto);
     }
 
     private OAuth2Response parseOAuth2Response(String registrationId, Map<String, Object> attributes) {
@@ -50,15 +59,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         } else {
             throw new IllegalArgumentException("Unsupported registration ID");
         }
-    }
-
-    private SocialMemberDto mapToSocialMemberDto(SocialMember member) {
-        SocialMemberDto dto = new SocialMemberDto();
-        dto.setSnsId(member.getSnsId());
-        dto.setName(member.getName());
-        dto.setEmail(member.getEmail());
-        dto.setRole(member.getRole().name());
-        return dto;
     }
 
 }

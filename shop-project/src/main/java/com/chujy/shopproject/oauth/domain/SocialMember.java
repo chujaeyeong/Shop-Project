@@ -1,5 +1,6 @@
 package com.chujy.shopproject.oauth.domain;
 
+import com.chujy.shopproject.constant.Role;
 import com.chujy.shopproject.domain.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -12,7 +13,15 @@ import lombok.Setter;
 public class SocialMember extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.TABLE, generator = "social_member_generator")
+    @TableGenerator(
+            name = "social_member_generator",
+            table = "social_member_id_gen",
+            pkColumnName = "gen_name",
+            valueColumnName = "gen_val",
+            pkColumnValue = "SocialMember_ID",
+            allocationSize = 1
+    )
     private Long id;
 
     private String username;
@@ -21,6 +30,7 @@ public class SocialMember extends BaseEntity {
 
     private String email;
 
-    private String role;
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
 }

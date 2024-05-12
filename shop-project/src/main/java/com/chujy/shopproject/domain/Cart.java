@@ -1,5 +1,6 @@
 package com.chujy.shopproject.domain;
 
+import com.chujy.shopproject.oauth.domain.SocialMember;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,11 +22,22 @@ public class Cart extends BaseEntity {
     @JoinColumn(name = "member_id")
     private Member member;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "social_member_id")
+    private SocialMember socialMember;
 
-    // 처음 장바구니에 상품을 담을 때 해당 회원의 장바구니를 생성
-    public static Cart createCart(Member member) {
+
+    // 일반 회원용 장바구니 생성
+    public static Cart createMemberCart(Member member) {
         Cart cart = new Cart();
         cart.setMember(member);
+        return cart;
+    }
+
+    // SNS 회원용 장바구니 생성
+    public static Cart createSocialMemberCart(SocialMember socialMember) {
+        Cart cart = new Cart();
+        cart.setSocialMember(socialMember);
         return cart;
     }
 

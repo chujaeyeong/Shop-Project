@@ -1,5 +1,6 @@
 package com.chujy.shopproject.oauth.service;
 
+import com.chujy.shopproject.constant.Role;
 import com.chujy.shopproject.oauth.domain.SocialMember;
 import com.chujy.shopproject.oauth.dto.*;
 import com.chujy.shopproject.oauth.repository.SocialMemberRepository;
@@ -46,14 +47,16 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             socialMember.setUsername(username);
             socialMember.setEmail(oAuth2Response.getEmail());
             socialMember.setName(oAuth2Response.getName());
-            socialMember.setRole("ROLE_USER");
+            socialMember.setRole(Role.ROLE_USER);
+//            socialMember.setRole("ROLE_USER");
 
             socialMemberRepository.save(socialMember);
 
             SocialMemberDto socialMemberDto = new SocialMemberDto();
             socialMemberDto.setUsername(username);
             socialMemberDto.setName(oAuth2Response.getName());
-            socialMemberDto.setRole("ROLE_USER");
+            socialMemberDto.setRole(Role.ROLE_USER);
+//            socialMemberDto.setRole("ROLE_USER");
 
             return new CustomOAuth2User(socialMemberDto);
 

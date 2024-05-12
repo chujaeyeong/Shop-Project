@@ -1,5 +1,6 @@
 package com.chujy.shopproject.oauth.dto;
 
+import com.chujy.shopproject.constant.Role;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
@@ -20,18 +21,27 @@ public class CustomOAuth2User implements OAuth2User {
         return null;
     }
 
+//    @Override
+//    public Collection<? extends GrantedAuthority> getAuthorities() {
+//        Collection<GrantedAuthority> collection = new ArrayList<>();
+//
+//        collection.add(new GrantedAuthority() {
+//            @Override
+//            public String getAuthority() {
+//                return socialMemberDto.getRole();
+//            }
+//        });
+//
+//        return collection;
+//    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        Collection<GrantedAuthority> collection = new ArrayList<>();
-
-        collection.add(new GrantedAuthority() {
-            @Override
-            public String getAuthority() {
-                return socialMemberDto.getRole();
-            }
-        });
-
-        return collection;
+        Collection<GrantedAuthority> authorities = new ArrayList<>();
+        Role role = socialMemberDto.getRole();
+        String authority = role.name().startsWith("ROLE_") ? role.name() : "ROLE_" + role.name();
+        authorities.add(() -> authority);
+        return authorities;
     }
 
     @Override

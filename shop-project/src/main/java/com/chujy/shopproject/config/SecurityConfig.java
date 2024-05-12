@@ -39,14 +39,14 @@ public class SecurityConfig {
 
         // 특정 URL에 대한 권한 설정
         // permitAll() : 모든 사용자가 인증(로그인) 없이 해당 경로에 접근
-        // hasRole("ADMIN") : /admin 으로 시작하는 경로는 ADMIN Role 일 경우에만 접근 가능
+        // hasAnyAuthority("ROLE_ADMIN") : /admin 으로 시작하는 경로는 ROLE_ADMIN Role 일 경우에만 접근 가능
         // 명시한 나머지 경로는 모두 인증을 요구하도록 설정
         http.authorizeHttpRequests((authorizeRequests) -> {
             authorizeRequests
                     .requestMatchers("/favicon.ico", "/error").permitAll()
                     .requestMatchers("/css/**", "/js/**", "/img/**").permitAll()
                     .requestMatchers("/", "/members/**", "/item/**", "/images/**").permitAll()
-                    .requestMatchers("/admin/**").hasRole("ADMIN")
+                    .requestMatchers("/admin/**").hasAnyAuthority("ROLE_ADMIN")
                     .anyRequest().authenticated();
         });
 

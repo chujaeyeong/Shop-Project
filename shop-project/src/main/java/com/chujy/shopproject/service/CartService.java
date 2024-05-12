@@ -38,7 +38,7 @@ public class CartService {
 
         Cart cart = cartRepository.findByMemberId(member.getId());
         if (cart == null) {
-            cart = Cart.createCart(member);
+            cart = Cart.createMemberCart(member);
             cartRepository.save(cart);
         }
 

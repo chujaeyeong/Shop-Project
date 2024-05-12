@@ -1,6 +1,7 @@
 package com.chujy.shopproject.domain;
 
 import com.chujy.shopproject.constant.OrderStatus;
+import com.chujy.shopproject.oauth.domain.SocialMember;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,6 +24,10 @@ public class Order extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "social_member_id")
+    private SocialMember socialMember;
 
     private LocalDateTime orderDate;    // 주문일
 

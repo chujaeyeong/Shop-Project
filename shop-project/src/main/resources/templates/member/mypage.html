@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout1}">
+<head>
+    <meta charset="UTF-8">
+    <title>My Page</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+    <div>
+        <h1 th:text="${member.name} + '님 환영합니다.'"></h1>
+        <!--    <h3 th:text="'누적 구매 금액: ' + ${totalAmount} + '원'">누적 구매 금액: 0원</h3>-->
+    </div>
+
+    <div>
+        <table>
+            <tr>
+                <td><a th:href="@{/member/updateMember}">회원정보 수정</a></td>
+                <td><a th:href="@{/cart}">장바구니</a></td>
+            </tr>
+            <tr>
+                <td><a th:href="@{/orders}">구매내역</a></td>
+                <td><a th:href="@{/board}">Board (나의 게시물 관리)</a></td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+</body>
+</html>

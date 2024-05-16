@@ -77,22 +77,25 @@ public class MemberController {
 
     // 회원정보 수정
     @PostMapping("/update")
-    public String updateMember(@AuthenticationPrincipal CustomUserDetails userDetails,
-                               @Valid MemberFormDto memberFormDto,
+    public String updateMember(@Valid MemberFormDto memberFormDto,
                                BindingResult bindingResult,
+                               Authentication authentication,
                                RedirectAttributes redirectAttributes) {
 
         if (bindingResult.hasErrors()) {
-            return "/member/updateMemberForm";
+            return "member/memberUpdateForm";  // 에러가 있으면 폼 페이지로 돌아감
         }
 
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Long userId = userDetails.getId();
+
         try {
-            memberService.updateMember(userDetails.getId(), memberFormDto);
-            redirectAttributes.addFlashAttribute("message", "회원정보가 수정되었습니다!");
+            memberService.updateMember(userId, memberFormDto);
+            redirectAttributes.addFlashAttribute("successMessage", "회원정보가 수정되었습니다!");
             return "redirect:/member/mypage";
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("message", "회원정보 수정 실패: " + e.getMessage());
-            return "/member/updateMemberForm";
+            bindingResult.rejectValue(null, "updateFailed", e.getMessage());
+            return "member/memberUpdateForm";
         }
     }
 

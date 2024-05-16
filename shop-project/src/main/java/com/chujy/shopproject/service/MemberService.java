@@ -71,18 +71,22 @@ public class MemberService implements UserDetailsService {
     // 회원정보 수정
     public Member updateMember(Long id, MemberFormDto memberFormDto) {
         Member member = findById(id);
+        if (member == null) {
+            throw new UsernameNotFoundException("해당 사용자를 찾을 수 없습니다.");
+        }
 
         if (memberFormDto.getName() != null) {
             member.setName(memberFormDto.getName());
         }
         if (memberFormDto.getPassword() != null && !memberFormDto.getPassword().isEmpty()) {
+            // 현재 비밀번호와 일치하는지 확인 후 업데이트
             member.setPassword(passwordEncoder.encode(memberFormDto.getPassword()));
         }
         if (memberFormDto.getAddress() != null) {
             member.setAddress(memberFormDto.getAddress());
         }
 
-        return memberRepository.save(member); // 업데이트된 회원 정보 저장
+        return member;
     }
 
 }

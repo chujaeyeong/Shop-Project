@@ -1,5 +1,6 @@
 package com.chujy.shopproject.dto;
 
+import com.chujy.shopproject.domain.Member;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Getter;
@@ -22,5 +23,16 @@ public class MemberFormDto {
 
     @NotEmpty(message = "주소는 필수 입력 값입니다.")
     private String address;
+
+
+    // 회원정보 수정을 위한 메소드
+    public static MemberFormDto from(Member member) {
+        MemberFormDto formDto = new MemberFormDto();
+        formDto.setName(member.getName());
+        formDto.setEmail(member.getEmail());
+        formDto.setAddress(member.getAddress());
+
+        return formDto;
+    }
 
 }

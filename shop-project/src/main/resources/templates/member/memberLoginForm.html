@@ -12,6 +12,28 @@
     </style>
 </th:block>
 
+<!-- 사용자 스크립트 추가 -->
+<th:block layout:fragment="script">
+
+    <script>
+        function togglePasswordVisibility(passwordFieldId) {
+            var passwordInput = document.getElementById(passwordFieldId);
+            var toggleIcon = passwordInput.nextElementSibling.querySelector('i');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('bi-eye');
+                toggleIcon.classList.add('bi-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('bi-eye-slash');
+                toggleIcon.classList.add('bi-eye');
+            }
+        }
+    </script>
+
+
+</th:block>
+
 <div layout:fragment="content">
 
     <form role="form" method="post" action="/members/login">
@@ -21,7 +43,12 @@
         </div>
         <div class="form-group">
             <label th:for="password">비밀번호</label>
-            <input type="password" name="password" id="password" class="form-control" placeholder="비밀번호 입력">
+            <div class="position-relative">
+                <input type="password" class="form-control" id="loginPassword" placeholder="비밀번호 입력" name="password">
+                <button type="button" onclick="togglePasswordVisibility('loginPassword')" class="toggle-password">
+                    <i class="bi bi-eye"></i>
+                </button>
+            </div>
         </div>
         <p th:if="${loginErrorMsg}" class="error" th:text="${loginErrorMsg}"></p>
         <button class="btn btn-primary">로그인</button>
@@ -31,7 +58,7 @@
 
     <!-- 소셜 로그인 버튼 추가 -->
     <div class="social-buttons">
-        <h3>소셜 로그인:</h3>
+        <h3></h3>
         <a href="/oauth2/authorization/google" class="btn btn-danger">Google 로그인</a>
         <a href="/oauth2/authorization/naver" class="btn btn-success">Naver 로그인</a>
     </div>

@@ -24,6 +24,22 @@
         });
     </script>
 
+    <script>
+        function togglePasswordVisibility(passwordFieldId) {
+            var passwordInput = document.getElementById(passwordFieldId);
+            var toggleIcon = passwordInput.nextElementSibling.querySelector('i');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('bi-eye');
+                toggleIcon.classList.add('bi-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('bi-eye-slash');
+                toggleIcon.classList.add('bi-eye');
+            }
+        }
+    </script>
+
 </th:block>
 
 <div layout:fragment="content">
@@ -41,7 +57,12 @@
         </div>
         <div class="form-group">
             <label th:for="password">비밀번호</label>
-            <input type="password" th:field="*{password}" class="form-control" placeholder="비밀번호 입력">
+            <div class="position-relative">
+                <input type="password" class="form-control" id="password" placeholder="비밀번호 입력" th:field="*{password}">
+                <button type="button" onclick="togglePasswordVisibility('password')" class="toggle-password">
+                    <i class="bi bi-eye"></i>
+                </button>
+            </div>
             <p th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="fieldError">Incorrect data</p>
         </div>
         <div class="form-group">

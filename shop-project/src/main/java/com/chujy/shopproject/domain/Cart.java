@@ -18,26 +18,15 @@ public class Cart extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)   // 단방향 매핑, ~ToOne 지연 로딩 설정
-    @JoinColumn(name = "member_id")
-    private Member member;
-
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "social_member_id")
-    private SocialMember socialMember;
+    @JoinColumn(name = "user_id")   // 'member_id', 'social_member_id' 대신 'user_id' 사용
+    private AbstractUser user;
 
 
-    // 일반 회원용 장바구니 생성
-    public static Cart createMemberCart(Member member) {
+    // 유저 (Member, SocialMember) 에 따른 장바구니 생성
+    public static Cart createCart(AbstractUser user) {
         Cart cart = new Cart();
-        cart.setMember(member);
-        return cart;
-    }
-
-    // SNS 회원용 장바구니 생성
-    public static Cart createSocialMemberCart(SocialMember socialMember) {
-        Cart cart = new Cart();
-        cart.setSocialMember(socialMember);
+        cart.setUser(user);
         return cart;
     }
 

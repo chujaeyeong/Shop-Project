@@ -1,17 +1,11 @@
 package com.chujy.shopproject.service;
 
-import com.chujy.shopproject.domain.Cart;
-import com.chujy.shopproject.domain.CartItem;
-import com.chujy.shopproject.domain.Item;
-import com.chujy.shopproject.domain.Member;
+import com.chujy.shopproject.domain.*;
 import com.chujy.shopproject.dto.CartDetailDto;
 import com.chujy.shopproject.dto.CartItemDto;
 import com.chujy.shopproject.dto.CartOrderDto;
 import com.chujy.shopproject.dto.OrderDto;
-import com.chujy.shopproject.repository.CartItemRepository;
-import com.chujy.shopproject.repository.CartRepository;
-import com.chujy.shopproject.repository.ItemRepository;
-import com.chujy.shopproject.repository.MemberRepository;
+import com.chujy.shopproject.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,18 +21,18 @@ import java.util.List;
 public class CartService {
 
     private final ItemRepository itemRepository;
-    private final MemberRepository memberRepository;
+    private final UserRepository userRepository;
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
     private final OrderService orderService;
 
     public Long addCart(CartItemDto cartItemDto, String email) {
         Item item = itemRepository.findById(cartItemDto.getItemId()).orElseThrow(EntityNotFoundException::new);
-        Member member = memberRepository.findByEmail(email);
+        AbstractUser user = userRepository.findByEmail(email);
 
-        Cart cart = cartRepository.findByMemberId(member.getId());
+        Cart cart = cartRepository.findByUserId(user.getId());
         if (cart == null) {
-            cart = Cart.createMemberCart(member);
+            cart = Cart.createCart(user);
             cartRepository.save(cart);
         }
 
@@ -58,8 +52,9 @@ public class CartService {
     public List<CartDetailDto> getCartList(String email) {
         List<CartDetailDto> cartDetailDtoList = new ArrayList<>();
 
-        Member member = memberRepository.findByEmail(email);
-        Cart cart = cartRepository.findByMemberId(member.getId());
+        AbstractUser user = userRepository.findByEmail(email);
+
+        Cart cart = cartRepository.findByUserId(user.getId());
         if (cart == null) {
             return cartDetailDtoList;
         }
@@ -71,11 +66,11 @@ public class CartService {
 
     @Transactional(readOnly = true)
     public boolean validateCartItem(Long cartItemId, String email) {
-        Member curMember = memberRepository.findByEmail(email);
+        AbstractUser curUser = userRepository.findByEmail(email);
         CartItem cartItem = cartItemRepository.findById(cartItemId).orElseThrow(EntityNotFoundException::new);
-        Member savedMember = cartItem.getCart().getMember();
+        AbstractUser savedUser = cartItem.getCart().getUser();
 
-        if (!StringUtils.equals(curMember.getEmail(), savedMember.getEmail())) {
+        if (!StringUtils.equals(curUser.getEmail(), savedUser.getEmail())) {
             return false;
         }
 

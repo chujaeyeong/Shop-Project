@@ -2,35 +2,19 @@ package com.chujy.shopproject.domain;
 
 import com.chujy.shopproject.constant.Role;
 import com.chujy.shopproject.dto.MemberFormDto;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Entity
-@Table(name = "member")
 @Getter
 @Setter
-@ToString
-public class Member extends BaseEntity {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "member_id")
-    private Long id;
-
-    private String name;
-
-    @Column(unique = true)
-    private String email;
+@Table(name = "member")
+public class Member extends AbstractUser {
 
     private String password;
-
-    private String address;
-
-    @Enumerated(EnumType.STRING)
-    private Role role;
 
     // Member 생성 메소드를 만들어서 관리
     public static Member createMember(MemberFormDto memberFormDto, PasswordEncoder passwordEncoder) {

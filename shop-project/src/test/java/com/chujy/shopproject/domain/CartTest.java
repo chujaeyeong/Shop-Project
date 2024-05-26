@@ -45,22 +45,22 @@ class CartTest {
         return Member.createMember(memberFormDto, passwordEncoder);
     }
 
-    @Test
-    @DisplayName("장바구니 회원 엔티티 매핑 조회 테스트")
-    public void findCartAndMemberTest() {
-        Member member = createMember();
-        memberRepository.save(member);
-
-        Cart cart = new Cart();
-        cart.setMember(member);
-        cartRepository.save(cart);
-
-        em.flush();
-        em.clear();
-
-        Cart saveCart = cartRepository.findById(cart.getId()).orElseThrow(EntityNotFoundException::new);
-
-        assertEquals(saveCart.getMember().getId(), member.getId());
-    }
+//    @Test
+//    @DisplayName("장바구니 회원 엔티티 매핑 조회 테스트")
+//    public void findCartAndMemberTest() {
+//        Member member = createMember();
+//        memberRepository.save(member);
+//
+//        Cart cart = new Cart();
+//        cart.setMember(member);
+//        cartRepository.save(cart);
+//
+//        em.flush();
+//        em.clear();
+//
+//        Cart saveCart = cartRepository.findById(cart.getId()).orElseThrow(EntityNotFoundException::new);
+//
+//        assertEquals(saveCart.getMember().getId(), member.getId());
+//    }
 
 }

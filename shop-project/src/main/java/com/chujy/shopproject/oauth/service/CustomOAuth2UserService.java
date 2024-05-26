@@ -5,6 +5,8 @@ import com.chujy.shopproject.oauth.domain.SocialMember;
 import com.chujy.shopproject.oauth.dto.*;
 import com.chujy.shopproject.oauth.repository.SocialMemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -15,23 +17,22 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
+    private static final Logger log = LoggerFactory.getLogger(CustomOAuth2UserService.class);
     private final SocialMemberRepository socialMemberRepository;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
 
         OAuth2User oAuth2User = super.loadUser(userRequest);
-        System.out.println(oAuth2User);
+        log.info("OAuth2User loaded: {}", oAuth2User);
 
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
         OAuth2Response oAuth2Response = null;
         if (registrationId.equals("naver")) {
             oAuth2Response = new NaverResponse(oAuth2User.getAttributes());
-        }
-        else if (registrationId.equals("google")) {
+        } else if (registrationId.equals("google")) {
             oAuth2Response = new GoogleResponse(oAuth2User.getAttributes());
-        }
-        else {
+        } else {
             return null;
         }
 
@@ -39,32 +40,33 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String username = oAuth2Response.getProvider() + " " + oAuth2Response.getProviderId();
 
         // 유저 정보를 DB에 저장하는 로직
-        // 1. 이미 로그인해서 유저가 DB에 존재 하는지 확인
         SocialMember existData = socialMemberRepository.findByUsername(username);
-        if (existData == null) { // 2. 없으면 DB에 유저 정보 저장
-
+        if (existData == null) {
             SocialMember socialMember = new SocialMember();
             socialMember.setUsername(username);
-            socialMember.setEmail(oAuth2Response.getEmail());
+            if (oAuth2Response.getEmail() != null && !oAuth2Response.getEmail().isEmpty()) {
+                socialMember.setEmail(oAuth2Response.getEmail());
+            } else {
+                socialMember.setEmail(username);  // 이메일이 없는 경우 username을 이메일로 사용
+            }
             socialMember.setName(oAuth2Response.getName());
             socialMember.setRole(Role.ROLE_USER);
-//            socialMember.setRole("ROLE_USER");
 
             socialMemberRepository.save(socialMember);
 
             SocialMemberDto socialMemberDto = new SocialMemberDto();
             socialMemberDto.setUsername(username);
             socialMemberDto.setName(oAuth2Response.getName());
+            socialMemberDto.setEmail(socialMember.getEmail());
             socialMemberDto.setRole(Role.ROLE_USER);
-//            socialMemberDto.setRole("ROLE_USER");
+
+            log.info("Email from OAuth2Response: {}", oAuth2Response.getEmail());
+            log.info("Name from OAuth2Response: {}", oAuth2Response.getName());
 
             return new CustomOAuth2User(socialMemberDto);
 
-        }
-
-        else { // 3. 이미 있으면 이름, 이메일값만 update (username는 유지)
-
-            existData.setEmail(oAuth2Response.getEmail());
+        } else {
+            existData.setEmail(oAuth2Response.getEmail() != null && !oAuth2Response.getEmail().isEmpty() ? oAuth2Response.getEmail() : username);
             existData.setName(oAuth2Response.getName());
 
             socialMemberRepository.save(existData);
@@ -72,11 +74,14 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             SocialMemberDto socialMemberDto = new SocialMemberDto();
             socialMemberDto.setUsername(existData.getUsername());
             socialMemberDto.setName(oAuth2Response.getName());
+            socialMemberDto.setEmail(existData.getEmail());
             socialMemberDto.setRole(existData.getRole());
+
+            log.info("Email from OAuth2Response: {}", oAuth2Response.getEmail());
+            log.info("Name from OAuth2Response: {}", oAuth2Response.getName());
 
             return new CustomOAuth2User(socialMemberDto);
         }
 
     }
-
 }

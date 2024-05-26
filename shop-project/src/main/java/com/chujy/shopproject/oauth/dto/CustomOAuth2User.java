@@ -21,20 +21,6 @@ public class CustomOAuth2User implements OAuth2User {
         return null;
     }
 
-//    @Override
-//    public Collection<? extends GrantedAuthority> getAuthorities() {
-//        Collection<GrantedAuthority> collection = new ArrayList<>();
-//
-//        collection.add(new GrantedAuthority() {
-//            @Override
-//            public String getAuthority() {
-//                return socialMemberDto.getRole();
-//            }
-//        });
-//
-//        return collection;
-//    }
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Collection<GrantedAuthority> authorities = new ArrayList<>();
@@ -46,10 +32,19 @@ public class CustomOAuth2User implements OAuth2User {
 
     @Override
     public String getName() {
-        return socialMemberDto.getName();
+        if (socialMemberDto.getEmail() != null && !socialMemberDto.getEmail().isEmpty()) {
+            return socialMemberDto.getEmail();
+        } else {
+            return socialMemberDto.getUsername(); // 이메일이 없는 경우 username 반환
+        }
     }
 
     public String getUsername() {
         return socialMemberDto.getUsername();
     }
+
+    public String getEmail() {
+        return socialMemberDto.getEmail();
+    }
+
 }

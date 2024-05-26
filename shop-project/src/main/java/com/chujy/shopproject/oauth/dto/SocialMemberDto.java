@@ -10,6 +10,7 @@ public class SocialMemberDto {
 
     private Role role;
     private String name;
-    private String username;
+    private String email;
+    private String username;    // 소셜 로그인 사용자를 구분하는 특수한 값
 
 }

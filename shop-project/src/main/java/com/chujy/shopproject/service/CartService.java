@@ -8,6 +8,7 @@ import com.chujy.shopproject.dto.OrderDto;
 import com.chujy.shopproject.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.thymeleaf.util.StringUtils;
@@ -28,7 +29,8 @@ public class CartService {
 
     public Long addCart(CartItemDto cartItemDto, String email) {
         Item item = itemRepository.findById(cartItemDto.getItemId()).orElseThrow(EntityNotFoundException::new);
-        AbstractUser user = userRepository.findByEmail(email);
+        AbstractUser user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("사용자 정보를 찾을 수 없습니다."));
 
         Cart cart = cartRepository.findByUserId(user.getId());
         if (cart == null) {
@@ -52,7 +54,8 @@ public class CartService {
     public List<CartDetailDto> getCartList(String email) {
         List<CartDetailDto> cartDetailDtoList = new ArrayList<>();
 
-        AbstractUser user = userRepository.findByEmail(email);
+        AbstractUser user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("사용자 정보를 찾을 수 없습니다."));
 
         Cart cart = cartRepository.findByUserId(user.getId());
         if (cart == null) {
@@ -66,7 +69,8 @@ public class CartService {
 
     @Transactional(readOnly = true)
     public boolean validateCartItem(Long cartItemId, String email) {
-        AbstractUser curUser = userRepository.findByEmail(email);
+        AbstractUser curUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("사용자 정보를 찾을 수 없습니다."));
         CartItem cartItem = cartItemRepository.findById(cartItemId).orElseThrow(EntityNotFoundException::new);
         AbstractUser savedUser = cartItem.getCart().getUser();
 

@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.thymeleaf.util.StringUtils;
@@ -29,7 +30,8 @@ public class OrderService {
 
     public Long order(OrderDto orderDto, String email) {
         Item item = itemRepository.findById(orderDto.getItemId()).orElseThrow(EntityNotFoundException::new);
-        AbstractUser user = userRepository.findByEmail(email);
+        AbstractUser user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("사용자 정보를 찾을 수 없습니다."));
 
         List<OrderItem> orderItemList = new ArrayList<>();
         OrderItem orderItem = OrderItem.createOrderItem(item, orderDto.getCount());
@@ -66,7 +68,8 @@ public class OrderService {
 
     @Transactional(readOnly = true)
     public boolean vaildateOrder(Long orderId, String email) {
-        AbstractUser curUser = userRepository.findByEmail(email);
+        AbstractUser curUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("사용자 정보를 찾을 수 없습니다."));
         Order order = orderRepository.findById(orderId).orElseThrow(EntityNotFoundException::new);
         AbstractUser savedUser = order.getUser();
 
@@ -83,7 +86,8 @@ public class OrderService {
     }
 
     public Long orders(List<OrderDto> orderDtoList, String email) {
-        AbstractUser user = userRepository.findByEmail(email);
+        AbstractUser user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("사용자 정보를 찾을 수 없습니다."));
         List<OrderItem> orderItemList = new ArrayList<>();
 
         for (OrderDto orderDto : orderDtoList) {

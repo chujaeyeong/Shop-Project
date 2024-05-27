@@ -4,10 +4,7 @@ import com.chujy.shopproject.domain.*;
 import com.chujy.shopproject.dto.OrderDto;
 import com.chujy.shopproject.dto.OrderHistDto;
 import com.chujy.shopproject.dto.OrderItemDto;
-import com.chujy.shopproject.repository.ItemImgRepository;
-import com.chujy.shopproject.repository.ItemRepository;
-import com.chujy.shopproject.repository.MemberRepository;
-import com.chujy.shopproject.repository.OrderRepository;
+import com.chujy.shopproject.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -26,19 +23,19 @@ import java.util.List;
 public class OrderService {
 
     private final ItemRepository itemRepository;
-    private final MemberRepository memberRepository;
+    private final UserRepository userRepository;
     private final OrderRepository orderRepository;
     private final ItemImgRepository itemImgRepository;
 
     public Long order(OrderDto orderDto, String email) {
         Item item = itemRepository.findById(orderDto.getItemId()).orElseThrow(EntityNotFoundException::new);
-        Member member = memberRepository.findByEmail(email);
+        AbstractUser user = userRepository.findByEmail(email);
 
         List<OrderItem> orderItemList = new ArrayList<>();
         OrderItem orderItem = OrderItem.createOrderItem(item, orderDto.getCount());
         orderItemList.add(orderItem);
 
-        Order order = Order.createOrder(member, orderItemList);
+        Order order = Order.createOrder(user, orderItemList);
         orderRepository.save(order);
 
         return order.getId();
@@ -69,11 +66,11 @@ public class OrderService {
 
     @Transactional(readOnly = true)
     public boolean vaildateOrder(Long orderId, String email) {
-        Member curMember = memberRepository.findByEmail(email);
+        AbstractUser curUser = userRepository.findByEmail(email);
         Order order = orderRepository.findById(orderId).orElseThrow(EntityNotFoundException::new);
-        Member savedMember = order.getMember();
+        AbstractUser savedUser = order.getUser();
 
-        if (!StringUtils.equals(curMember.getEmail(), savedMember.getEmail())) {
+        if (!StringUtils.equals(curUser.getEmail(), savedUser.getEmail())) {
             return false;
         }
 
@@ -86,7 +83,7 @@ public class OrderService {
     }
 
     public Long orders(List<OrderDto> orderDtoList, String email) {
-        Member member = memberRepository.findByEmail(email);
+        AbstractUser user = userRepository.findByEmail(email);
         List<OrderItem> orderItemList = new ArrayList<>();
 
         for (OrderDto orderDto : orderDtoList) {
@@ -96,7 +93,7 @@ public class OrderService {
             orderItemList.add(orderItem);
         }
 
-        Order order = Order.createOrder(member, orderItemList);
+        Order order = Order.createOrder(user, orderItemList);
         orderRepository.save(order);
 
         return order.getId();

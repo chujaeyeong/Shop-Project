@@ -22,12 +22,8 @@ public class Order extends BaseEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
-    private Member member;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "social_member_id")
-    private SocialMember socialMember;
+    @JoinColumn(name = "user_id")     // Member 대신 AbstractUser 참조로 변경
+    private AbstractUser user;
 
     private LocalDateTime orderDate;    // 주문일
 
@@ -43,9 +39,9 @@ public class Order extends BaseEntity {
         orderItem.setOrder(this);
     }
 
-    public static Order createOrder(Member member, List<OrderItem> orderItemList) {
+    public static Order createOrder(AbstractUser user, List<OrderItem> orderItemList) {
         Order order = new Order();
-        order.setMember(member);
+        order.setUser(user);
         for (OrderItem orderItem : orderItemList) {
             order.addOrderItem(orderItem);
         }

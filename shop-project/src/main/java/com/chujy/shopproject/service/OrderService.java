@@ -67,7 +67,7 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public boolean vaildateOrder(Long orderId, String email) {
+    public boolean validateOrder(Long orderId, String email) {
         AbstractUser curUser = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("사용자 정보를 찾을 수 없습니다."));
         Order order = orderRepository.findById(orderId).orElseThrow(EntityNotFoundException::new);

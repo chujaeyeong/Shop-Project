@@ -73,7 +73,7 @@ public class OrderController {
     public @ResponseBody ResponseEntity cancelOrder(@PathVariable("orderId") Long orderId,
                                                     Principal principal) {
 
-        if (!orderService.vaildateOrder(orderId, principal.getName())) {
+        if (!orderService.validateOrder(orderId, principal.getName())) {
             return new ResponseEntity<String>("주문 취소 권한이 없습니다.", HttpStatus.FORBIDDEN);
         }
 

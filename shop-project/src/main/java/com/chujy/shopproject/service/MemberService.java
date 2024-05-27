@@ -3,8 +3,6 @@ package com.chujy.shopproject.service;
 import com.chujy.shopproject.config.security.CustomUserDetails;
 import com.chujy.shopproject.domain.Member;
 import com.chujy.shopproject.dto.MemberFormDto;
-import com.chujy.shopproject.oauth.domain.SocialMember;
-import com.chujy.shopproject.oauth.repository.SocialMemberRepository;
 import com.chujy.shopproject.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -23,7 +21,6 @@ import java.util.Collections;
 public class MemberService implements UserDetailsService {
 
     private final MemberRepository memberRepository;
-    private final SocialMemberRepository socialMemberRepository;
     private final PasswordEncoder passwordEncoder;
 
 
@@ -59,12 +56,6 @@ public class MemberService implements UserDetailsService {
     // ID로 회원 조회 - 일반회원
     public Member findById(Long id) {
         return memberRepository.findById(id)
-                .orElseThrow(() -> new UsernameNotFoundException("회원 정보를 찾을 수 없습니다."));
-    }
-
-    // ID로 회원 조회 - SNS 회원
-    public SocialMember findBySocialMemberId(Long id) {
-        return socialMemberRepository.findById(id)
                 .orElseThrow(() -> new UsernameNotFoundException("회원 정보를 찾을 수 없습니다."));
     }
 

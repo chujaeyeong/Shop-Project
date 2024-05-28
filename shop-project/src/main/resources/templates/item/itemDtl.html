@@ -152,11 +152,11 @@
             <img th:src="${item.itemImgDtoList[0].imgUrl}" class="rounded repImg" th:alt="${item.itemName}">
         </div>
         <div class="wd50">
-            <span th:if="${item.itemSellStatus == T(com.chujy.shopproject.constant.ItemSellStatus).SELL}"
+            <span th:if="${item.itemSellStatus == T(com.chujy.shopproject.constant.ItemSellStatus).SELL and item.stockNumber > 0}"
                   class="badge badge-primary mgb-15">
                 판매중
             </span>
-            <span th:unless="${item.itemSellStatus == T(com.chujy.shopproject.constant.ItemSellStatus).SELL}"
+            <span th:unless="${item.itemSellStatus == T(com.chujy.shopproject.constant.ItemSellStatus).SELL and item.stockNumber > 0}"
                   class="badge btn-danger mgb-15">
                 품절
             </span>
@@ -181,12 +181,15 @@
                 <h5>결제 금액</h5>
                 <h3 name="totalPrice" id="totalPrice" class="font-weight-bold"></h3>
             </div>
-            <div th:if="${item.itemSellStatus == T(com.chujy.shopproject.constant.ItemSellStatus).SELL}" class="text-right">
-                <button type="button" class="btn btn-light border border-primary btn-lg" onclick="addCart()">장바구니 담기</button>
+            <div th:if="${item.stockNumber > 0 and item.itemSellStatus == T(com.chujy.shopproject.constant.ItemSellStatus).SELL}"
+                 class="text-right">
+                <button type="button" class="btn btn-light border border-primary btn-lg" onclick="addCart()">장바구니 담기
+                </button>
                 <button type="button" class="btn btn-primary btn-lg" onclick="order()">주문하기</button>
             </div>
-            <div th:unless="${item.itemSellStatus == T(com.chujy.shopproject.constant.ItemSellStatus).SELL}" class="text-right">
-                <button type="button" class="btn btn-danger btn-lg">품절</button>
+            <div th:unless="${item.stockNumber > 0 and item.itemSellStatus == T(com.chujy.shopproject.constant.ItemSellStatus).SELL}"
+                 class="text-right">
+                <button type="button" class="btn btn-danger btn-lg" disabled>품절</button>
             </div>
         </div>
     </div>

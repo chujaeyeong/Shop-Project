@@ -55,11 +55,21 @@ public class Item extends BaseEntity {
             throw new OutOfStockException("상품의 재고가 부족합니다. (현재 재고 수량: " + this.stockNumber + ")");
         }
         this.stockNumber = restStock;
+
+        // 상품의 재고가 0 이면 상태를 SOLD_OUT 으로 변경
+        if (this.stockNumber == 0) {
+            this.itemSellStatus = ItemSellStatus.SOLD_OUT;
+        }
     }
 
     // 주문 취소 시 상품 재고 증가를 위한 메소드
     public void addStock(int stockNumber) {
         this.stockNumber += stockNumber;
+
+        // 상품의 재고가 늘어나면 다시 상품 상태를 SELL로 변경
+        if (this.stockNumber > 0) {
+            this.itemSellStatus = ItemSellStatus.SELL;
+        }
     }
 
 }

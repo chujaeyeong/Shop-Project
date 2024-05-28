@@ -2,6 +2,7 @@ package com.chujy.shopproject.domain;
 
 import com.chujy.shopproject.constant.Role;
 import com.chujy.shopproject.dto.MemberFormDto;
+import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.Getter;
@@ -12,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Getter
 @Setter
 @Table(name = "member")
+@DiscriminatorValue("Member")
 public class Member extends AbstractUser {
 
     private String password;

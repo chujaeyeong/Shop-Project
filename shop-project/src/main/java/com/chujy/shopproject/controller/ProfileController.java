@@ -4,10 +4,7 @@ import com.chujy.shopproject.config.security.CustomUserDetails;
 import com.chujy.shopproject.domain.AbstractUser;
 import com.chujy.shopproject.domain.Member;
 import com.chujy.shopproject.oauth.dto.CustomOAuth2User;
-import com.chujy.shopproject.service.CartService;
-import com.chujy.shopproject.service.MemberService;
-import com.chujy.shopproject.service.OrderService;
-import com.chujy.shopproject.service.ProfileService;
+import com.chujy.shopproject.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,6 +17,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class ProfileController {
 
     private final ProfileService profileService;
+    private final UserService userService;
 
     // 마이페이지 메인 이동
     @GetMapping("/member/mypage")
@@ -42,6 +40,20 @@ public class ProfileController {
 
         model.addAttribute("user", user);
         return "member/mypage";
+    }
+
+    @GetMapping("/member/edit")
+    public String editProfile(Authentication authentication) {
+        String email = authentication.getName();
+        String userType = userService.getUserTypeByEmail(email);
+
+        if ("Member".equals(userType)) {
+            return "redirect:/members/update";  // 일반 회원의 회원정보 수정 폼으로 리다이렉트
+        } else if ("SocialMember".equals(userType)) {
+            return "redirect:/social/member/updateForm";  // 소셜 회원의 회원정보 수정 폼으로 리다이렉트
+        }
+
+        throw new IllegalStateException("Unknown user type");
     }
 
 }

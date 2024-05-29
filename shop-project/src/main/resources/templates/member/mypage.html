@@ -8,26 +8,43 @@
 </head>
 <body>
 
-<div layout:fragment="content">
-    <div>
-        <h1 th:text="${user.name} + '님 환영합니다.'"></h1>
+<div layout:fragment="content" class="container mt-5">
+
+    <div class="text-center mb-5">
+        <h1 th:text="${user.name} + '님, 환영합니다.'"></h1>
         <h3 th:text="'누적 구매 금액: ' + ${#numbers.formatDecimal(totalOrderAmount, 0, 'COMMA', 0, 'POINT')} + '원'">
             누적 구매 금액: 0원
         </h3>
     </div>
 
-    <div>
-        <table>
-            <tr>
-                <td><a th:href="@{/member/edit}">회원정보 수정</a></td>
-                <td><a th:href="@{/cart}">장바구니</a></td>
-            </tr>
-            <tr>
-                <td><a th:href="@{/orders}">구매내역</a></td>
-                <td><a th:href="@{/board}">Board (나의 게시물 관리)</a></td>
-            </tr>
-        </table>
+
+    <div class="row text-center">
+        <div class="col-md-3 mb-3">
+            <a th:href="@{/member/edit}" class="btn btn-primary btn-block">
+                <i class="bi bi-pencil-square"></i>
+                회원정보 수정
+            </a>
+        </div>
+        <div class="col-md-3 mb-3">
+            <a th:href="@{/cart}" class="btn btn-warning btn-block">
+                <i class="bi bi-cart4"></i>
+                장바구니
+            </a>
+        </div>
+        <div class="col-md-3 mb-3">
+            <a th:href="@{/orders}" class="btn btn-success btn-block">
+                <i class="bi bi-receipt"></i>
+                구매내역
+            </a>
+        </div>
+        <div class="col-md-3 mb-3">
+            <a th:href="@{/board}" class="btn btn-info btn-block">
+                <i class="bi bi-journal-text"></i>
+                나의 게시물 관리
+            </a>
+        </div>
     </div>
+
 </div>
 
 </body>

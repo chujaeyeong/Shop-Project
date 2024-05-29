@@ -1,5 +1,6 @@
 package com.chujy.shopproject.service;
 
+import com.chujy.shopproject.constant.OrderStatus;
 import com.chujy.shopproject.domain.*;
 import com.chujy.shopproject.dto.OrderDto;
 import com.chujy.shopproject.dto.OrderHistDto;
@@ -101,6 +102,20 @@ public class OrderService {
         orderRepository.save(order);
 
         return order.getId();
+    }
+
+    // 주문 상태가 ORDER 인 주문의 총 금액을 계산하는 메소드
+    @Transactional(readOnly = true)
+    public int getTotalOrderAmount(String email) {
+        // 주문 상태가 ORDER인 주문만 조회
+        List<Order> orders = orderRepository.findOrdersByEmailAndOrderStatus(email, OrderStatus.ORDER, Pageable.unpaged());
+
+        // 주문 상태가 ORDER인 주문들의 총 금액 계산
+        int totalAmount = orders.stream()
+                .mapToInt(Order::getTotalPrice)
+                .sum();
+
+        return totalAmount;
     }
 
 }

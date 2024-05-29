@@ -18,6 +18,7 @@ public class ProfileController {
 
     private final ProfileService profileService;
     private final UserService userService;
+    private final OrderService orderService;
 
     // 마이페이지 메인 이동
     @GetMapping("/member/mypage")
@@ -38,7 +39,12 @@ public class ProfileController {
             throw new IllegalStateException("Authenticated user not found");
         }
 
+        // 사용자의 누적 주문 금액을 계산
+        int totalOrderAmount = orderService.getTotalOrderAmount(user.getEmail());
+
         model.addAttribute("user", user);
+        model.addAttribute("totalOrderAmount", totalOrderAmount);
+
         return "member/mypage";
     }
 

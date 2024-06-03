@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layouts/layout1}">
+<head>
+    <meta charset="UTF-8">
+    <title>리뷰 관리</title>
+</head>
+<body>
+
+<div layout:fragment="content">
+
+    <h1>리뷰 관리</h1>
+    <div th:each="item : ${itemsEligibleForReview}">
+        <div>
+            <img th:src="${item.imgUrl}" alt="Item Image" style="width: 100px; height: 100px;" />
+        </div>
+        <p>상품 이름: <span th:text="${item.itemName}">상품 이름</span></p>
+        <p>구매 날짜: <span th:text="${item.orderDate}">구매 날짜</span></p>
+        <p>가격: <span th:text="${item.price}">가격</span>원</p>
+        <!-- 리뷰 작성, 수정, 삭제 링크 제공 -->
+        <a th:href="@{|/reviews/new?itemId=${item.itemId}|}">리뷰 작성</a>
+        <a th:href="@{|/reviews/edit/${item.itemId}|}">리뷰 수정</a>
+        <a th:href="@{|/reviews/delete/${item.itemId}|}">리뷰 삭제</a>
+    </div>
+
+    <!-- 페이지 네비게이션 -->
+    <div th:with="start=${(itemsEligibleForReview.number / maxPage) * maxPage + 1}, end=${(itemsEligibleForReview.totalPages == 0) ? 1 : (start + (maxPage - 1) < itemsEligibleForReview.totalPages ? start + (maxPage - 1) : itemsEligibleForReview.totalPages)}">
+        <ul class="pagination justify-content-center">
+
+            <li class="page-item" th:classappend="${itemsEligibleForReview.number eq 0}?'disabled':''">
+                <a th:href="@{'/reviews/manage?page=' + ${itemsEligibleForReview.number - 1}}" aria-label='Previous' class="page-link">
+                    <span aria-hidden='true'>Previous</span>
+                </a>
+            </li>
+
+            <li class="page-item" th:each="page : ${#numbers.sequence(start, end)}" th:classappend="${itemsEligibleForReview.number + 1 eq page} ? 'active' : ''">
+                <a th:href="@{'/reviews/manage?page=' + ${page - 1}}" class="page-link" th:text="${page}"></a>
+            </li>
+
+            <li class="page-item" th:classappend="${itemsEligibleForReview.number + 1 ge itemsEligibleForReview.totalPages} ? 'disabled' : ''">
+                <a th:href="@{'/reviews/manage?page=' + ${itemsEligibleForReview.number + 1}}" aria-label='Next' class="page-link">
+                    <span aria-hidden='true'>Next</span>
+                </a>
+            </li>
+
+        </ul>
+    </div>
+
+</div>
+
+</body>
+</html>

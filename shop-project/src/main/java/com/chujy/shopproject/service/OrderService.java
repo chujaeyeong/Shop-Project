@@ -118,4 +118,25 @@ public class OrderService {
         return totalAmount;
     }
 
+    // 사용자가 특정 상품에 대한 구매 이력이 있는지 확인하는 로직 (Review 비즈니스 로직에서 사용할 것)
+    @Transactional(readOnly = true)
+    public boolean hasPurchased(Long userId, Long itemId) {
+        return orderRepository.existsByUserIdAndItemIdAndOrderStatus(userId, itemId, OrderStatus.ORDER);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Order> findOrdersByUserId(Long userId) {
+        return orderRepository.findByUserIdAndOrderStatus(userId, OrderStatus.ORDER);
+    }
+
+    // 사용자 ID와 상품 ID로 특정 주문을 조회
+    @Transactional(readOnly = true)
+    public Order findOrderContainingItem(Long userId, Long itemId) {
+        List<Order> orders = orderRepository.findOrdersContainingItem(userId, itemId, OrderStatus.ORDER);
+        if (orders.isEmpty()) {
+            return null;  // 결과가 없는 경우
+        }
+        return orders.get(0);  // 첫 번째 결과 반환
+    }
+
 }

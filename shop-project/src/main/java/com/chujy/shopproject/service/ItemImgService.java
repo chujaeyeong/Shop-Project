@@ -54,4 +54,9 @@ public class ItemImgService {
         }
     }
 
+    // 특정 상품의 대표 이미지를 반환
+    public ItemImg getMainImageForItem(Long itemId) {
+        return itemImgRepository.findByItemIdAndRepimgYn(itemId, "Y");
+    }
+
 }

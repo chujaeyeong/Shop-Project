@@ -11,7 +11,7 @@ public abstract class AbstractUser extends BaseEntity implements User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id")
+    @Column(name = "user_id")
     private Long id;
 
     private String name;

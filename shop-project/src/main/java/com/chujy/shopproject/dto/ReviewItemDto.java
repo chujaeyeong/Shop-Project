@@ -1,5 +1,6 @@
 package com.chujy.shopproject.dto;
 
+import com.chujy.shopproject.constant.ReviewStatus;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,5 +16,6 @@ public class ReviewItemDto {
     private String imgUrl;
     private int price;
     private Long orderItemId;
+    private ReviewStatus reviewStatus;
 
 }

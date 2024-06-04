@@ -1,5 +1,6 @@
 package com.chujy.shopproject.domain;
 
+import com.chujy.shopproject.constant.ReviewStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -25,9 +26,15 @@ public class OrderItem extends BaseEntity {
     @JoinColumn(name = "order_id")
     private Order order;
 
+    @OneToOne(mappedBy = "orderItem", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Review review;
+
     private int orderPrice;     // 주문가격
 
     private int count;          // 수량
+
+    @Enumerated(EnumType.STRING)
+    private ReviewStatus reviewStatus = ReviewStatus.NOT_REVIEWED;
 
 
     public static OrderItem createOrderItem(Item item, int count) {

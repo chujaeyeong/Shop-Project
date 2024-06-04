@@ -4,6 +4,7 @@ import com.chujy.shopproject.domain.AbstractUser;
 import com.chujy.shopproject.domain.Item;
 import com.chujy.shopproject.dto.ReviewFormDto;
 import com.chujy.shopproject.dto.ReviewItemDto;
+import com.chujy.shopproject.oauth.dto.CustomOAuth2User;
 import com.chujy.shopproject.service.ReviewService;
 import com.chujy.shopproject.service.UserService;
 import jakarta.validation.Valid;
@@ -13,6 +14,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -21,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/reviews")
@@ -36,10 +39,10 @@ public class ReviewController {
 
     // 리뷰 생성 폼 페이지로 이동
     @GetMapping("/new")
-    public String createReviewForm(Model model) {
-        ReviewFormDto reviewFormDto = new ReviewFormDto();
+    public String createReviewForm(@RequestParam("orderItemId") Long orderItemId, Model model) {
+        ReviewFormDto reviewFormDto = reviewService.createReviewFormDto(orderItemId);
         model.addAttribute("reviewFormDto", reviewFormDto);
-        return "review/reviewForm";
+        return "reviews/reviewForm";
     }
 
     // 리뷰 생성
@@ -48,13 +51,15 @@ public class ReviewController {
                                BindingResult bindingResult,
                                @RequestParam("reviewImages") List<MultipartFile> reviewImages,
                                @AuthenticationPrincipal UserDetails userDetails,
+                               @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
                                RedirectAttributes redirectAttributes,
                                Model model) {
         if (bindingResult.hasErrors()) {
-            return "review/reviewForm";  // 입력 오류가 있을 경우 다시 폼을 보여줌
+            return "reviews/reviewForm";  // 입력 오류가 있을 경우 다시 폼을 보여줌
         }
         try {
-            AbstractUser user = userService.getUserByEmail(userDetails.getUsername());
+            String email = getEmailFromPrincipal(userDetails, customOAuth2User);
+            AbstractUser user = userService.getUserByEmail(email);
             reviewFormDto.setUserId(user.getId());
             Long reviewId = reviewService.saveReview(reviewFormDto, reviewImages);
             return "redirect:/reviews/details/" + reviewId;
@@ -79,6 +84,7 @@ public class ReviewController {
                                BindingResult bindingResult,
                                @RequestParam("reviewImages") List<MultipartFile> reviewImages,
                                @AuthenticationPrincipal UserDetails userDetails,
+                               @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
                                RedirectAttributes redirectAttributes,
                                Model model) {
         if (bindingResult.hasErrors()) {
@@ -86,7 +92,8 @@ public class ReviewController {
             return "reviews/editReviewForm";  // 입력 오류가 있을 경우 다시 폼을 보여줌
         }
         try {
-            AbstractUser user = userService.getUserByEmail(userDetails.getUsername());
+            String email = getEmailFromPrincipal(userDetails, customOAuth2User);
+            AbstractUser user = userService.getUserByEmail(email);
             if (!user.getId().equals(reviewFormDto.getUserId())) {
                 throw new IllegalStateException("Unauthorized attempt to update review");
             }
@@ -101,14 +108,16 @@ public class ReviewController {
     // 리뷰 삭제
     @PostMapping("/{reviewId}/delete")
     public String deleteReview(@PathVariable Long reviewId,
-                               @AuthenticationPrincipal UserDetails userDetails) {
+                               @AuthenticationPrincipal UserDetails userDetails,
+                               @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
         ReviewFormDto review = reviewService.getReviewDetails(reviewId);
-        AbstractUser user = userService.getUserByEmail(userDetails.getUsername());
+        String email = getEmailFromPrincipal(userDetails, customOAuth2User);
+        AbstractUser user = userService.getUserByEmail(email);
         if (!user.getId().equals(review.getUserId())) {
             throw new IllegalStateException("Unauthorized attempt to delete review");
         }
         reviewService.deleteReview(reviewId);
-        return "redirect:/reviews/list";
+        return "redirect:/reviews/manage";
     }
 
     // 리뷰 상세 정보 페이지로 이동
@@ -122,14 +131,25 @@ public class ReviewController {
     // 리뷰 관리 페이지 표시
     @GetMapping("/manage")
     public String manageReviews(@AuthenticationPrincipal UserDetails userDetails,
+                                @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
                                 @RequestParam(defaultValue = "0") int page,
                                 Model model) {
-        AbstractUser user = userService.getUserByEmail(userDetails.getUsername());
-        Pageable pageable = PageRequest.of(page, PAGE_SIZE); // 한 페이지에 5개씩 표시
+        String email = getEmailFromPrincipal(userDetails, customOAuth2User);
+        AbstractUser user = userService.getUserByEmail(email);
+        Pageable pageable = PageRequest.of(page, PAGE_SIZE);
         Page<ReviewItemDto> itemsEligibleForReview = reviewService.getItemsEligibleForReview(user.getId(), pageable);
         model.addAttribute("itemsEligibleForReview", itemsEligibleForReview);
         model.addAttribute("maxPage", MAX_PAGE);
         return "reviews/manageReviews";
+    }
+
+    private String getEmailFromPrincipal(UserDetails userDetails, CustomOAuth2User customOAuth2User) {
+        if (userDetails != null) {
+            return userDetails.getUsername();
+        } else if (customOAuth2User != null) {
+            return customOAuth2User.getEmail();
+        }
+        throw new IllegalStateException("인증된 사용자 정보가 존재하지 않습니다.");
     }
 
 }

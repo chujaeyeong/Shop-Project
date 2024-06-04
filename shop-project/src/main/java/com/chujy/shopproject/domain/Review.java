@@ -26,16 +26,21 @@ public class Review extends BaseEntity {
     @JoinColumn(name = "user_id")
     private AbstractUser user;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_item_id")
+    private OrderItem orderItem;
+
     private String content;
 
     private Integer rating;
 
 
     // 리뷰 생성 메소드를 만들어서 관리
-    public static Review createReview(ReviewFormDto reviewFormDto, Item item, AbstractUser user) {
+    public static Review createReview(ReviewFormDto reviewFormDto, Item item, AbstractUser user, OrderItem orderItem) {
         Review review = new Review();
         review.setItem(item);
         review.setUser(user);
+        review.setOrderItem(orderItem);
         review.setContent(reviewFormDto.getContent());
         review.setRating(reviewFormDto.getRating());
 

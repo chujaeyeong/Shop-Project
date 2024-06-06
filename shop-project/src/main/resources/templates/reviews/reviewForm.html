@@ -14,11 +14,9 @@
         .input-group {
             margin-bottom: 15px;
         }
-
         .img-div {
             margin-bottom: 10px;
         }
-
         .fieldError {
             color: #bd2130;
         }
@@ -27,32 +25,26 @@
 
 <!-- 사용자 스크립트 추가 -->
 <th:block layout:fragment="script">
-
     <script th:inline="javascript">
         $(document).ready(function () {
             bindDomEvent();
         });
-
         function bindDomEvent() {
             $(".custom-file-input").on("change", function () {
-                var fileName = $(this).val().split("\\").pop();  //이미지 파일명
-                var fileExt = fileName.substring(fileName.lastIndexOf(".") + 1); // 확장자 추출
-                fileExt = fileExt.toLowerCase(); //소문자 변환
-
+                var fileName = $(this).val().split("\\").pop();
+                var fileExt = fileName.substring(fileName.lastIndexOf(".") + 1);
+                fileExt = fileExt.toLowerCase();
                 if (fileExt != "jpg" && fileExt != "jpeg" && fileExt != "gif" && fileExt != "png" && fileExt != "bmp") {
                     alert("이미지 파일만 등록이 가능합니다.");
                     return;
                 }
-
                 $(this).siblings(".custom-file-label").html(fileName);
             });
         }
     </script>
-
 </th:block>
 
 <div layout:fragment="content">
-
     <h2>리뷰 작성</h2>
     <form th:action="@{/reviews/new}" th:object="${reviewFormDto}" method="post" enctype="multipart/form-data">
         <input type="hidden" th:field="*{orderItemId}"/>
@@ -99,7 +91,6 @@
 
         <button type="submit" class="btn btn-primary">리뷰 제출</button>
     </form>
-
 </div>
 
 </body>

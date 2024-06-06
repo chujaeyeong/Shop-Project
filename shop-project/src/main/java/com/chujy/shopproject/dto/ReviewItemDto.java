@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 @Setter
 public class ReviewItemDto {
 
+    private Long reviewId;      // 리뷰 ID 필드 추가
     private Long itemId;
     private String itemName;
     private LocalDateTime orderDate;

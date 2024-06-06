@@ -45,20 +45,11 @@ public class ReviewImgService {
 
     // 이미지 정보 업데이트
     public void updateReviewImg(Review review, List<MultipartFile> reviewImgFileList) throws Exception {
-        for (MultipartFile reviewImgFile : reviewImgFileList) {
-            if (!reviewImgFile.isEmpty()) {
-                // 기존의 이미지를 새 이미지로 교체
-                String oriImgName = reviewImgFile.getOriginalFilename();
-                String imgName = fileService.uploadFile(reviewImgLocation, oriImgName, reviewImgFile.getBytes());
-                String imgUrl = "/images/review/" + imgName;
+        // 기존 이미지를 모두 삭제
+        deleteImagesByReviewId(review.getId());
 
-                // 신규 이미지 저장
-                ReviewImg newReviewImg = new ReviewImg();
-                newReviewImg.setReview(review);
-                newReviewImg.updateReviewImg(oriImgName, imgName, imgUrl);
-                reviewImgRepository.save(newReviewImg);
-            }
-        }
+        // 새로운 이미지 저장
+        saveReviewImg(review, reviewImgFileList);
     }
 
     // Review 관련 이미지 전체 삭제

@@ -46,7 +46,7 @@ public class ReviewFormDto {
         dto.setItemId(review.getItem().getId());
         dto.setUserId(review.getUser().getId());
         dto.setUserName(review.getUser().getName());
-        dto.setOrderItemId(review.getOrderItem().getId()); // Review 엔티티에 OrderItem 연결이 필요합니다.
+        dto.setOrderItemId(review.getOrderItem().getId());
         return dto;
     }
 
@@ -54,7 +54,7 @@ public class ReviewFormDto {
     public static ReviewFormDto fromOrderItem(OrderItem orderItem) {
         ModelMapper modelMapper = new ModelMapper();
         ReviewFormDto dto = new ReviewFormDto();
-        dto.setItemId(orderItem.getItem().getId());
+        dto.setItemId(orderItem.getItem().getId()); // 여기서 itemId가 설정됨
         dto.setUserId(orderItem.getOrder().getUser().getId());
         dto.setUserName(orderItem.getOrder().getUser().getName());
         dto.setOrderItemId(orderItem.getId());

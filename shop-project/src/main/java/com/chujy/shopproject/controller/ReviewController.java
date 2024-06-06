@@ -1,12 +1,13 @@
 package com.chujy.shopproject.controller;
 
 import com.chujy.shopproject.domain.AbstractUser;
-import com.chujy.shopproject.domain.Item;
+import com.chujy.shopproject.domain.OrderItem;
 import com.chujy.shopproject.dto.ReviewFormDto;
 import com.chujy.shopproject.dto.ReviewItemDto;
 import com.chujy.shopproject.oauth.dto.CustomOAuth2User;
 import com.chujy.shopproject.service.ReviewService;
 import com.chujy.shopproject.service.UserService;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -14,7 +15,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -23,7 +23,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
-import java.util.Map;
 
 @Controller
 @RequestMapping("/reviews")
@@ -41,6 +40,7 @@ public class ReviewController {
     @GetMapping("/new")
     public String createReviewForm(@RequestParam("orderItemId") Long orderItemId, Model model) {
         ReviewFormDto reviewFormDto = reviewService.createReviewFormDto(orderItemId);
+        reviewFormDto.setOrderItemId(orderItemId);
         model.addAttribute("reviewFormDto", reviewFormDto);
         return "reviews/reviewForm";
     }
@@ -50,6 +50,7 @@ public class ReviewController {
     public String createReview(@ModelAttribute @Valid ReviewFormDto reviewFormDto,
                                BindingResult bindingResult,
                                @RequestParam("reviewImages") List<MultipartFile> reviewImages,
+                               @RequestParam("orderItemId") Long orderItemId,
                                @AuthenticationPrincipal UserDetails userDetails,
                                @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
                                RedirectAttributes redirectAttributes,
@@ -58,23 +59,34 @@ public class ReviewController {
             return "reviews/reviewForm";  // 입력 오류가 있을 경우 다시 폼을 보여줌
         }
         try {
+            reviewFormDto.setOrderItemId(orderItemId);
+            OrderItem orderItem = reviewService.findOrderItemById(orderItemId);
+            reviewFormDto.setItemId(orderItem.getItem().getId());
+
             String email = getEmailFromPrincipal(userDetails, customOAuth2User);
             AbstractUser user = userService.getUserByEmail(email);
             reviewFormDto.setUserId(user.getId());
             Long reviewId = reviewService.saveReview(reviewFormDto, reviewImages);
+
             return "redirect:/reviews/details/" + reviewId;
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "리뷰 생성 중 오류가 발생했습니다: " + e.getMessage());
-            return "redirect:/reviews/new";
+            return "redirect:/reviews/new?orderItemId=" + orderItemId;
         }
     }
 
     // 리뷰 수정 폼 페이지로 이동
     @GetMapping("/{reviewId}/edit")
     public String updateReviewForm(@PathVariable Long reviewId, Model model) {
-        ReviewFormDto reviewDto = reviewService.getReviewDetails(reviewId);
-        model.addAttribute("reviewFormDto", reviewDto);
-        return "reviews/editReviewForm";
+        try {
+            ReviewFormDto reviewDto = reviewService.getReviewDetails(reviewId);
+            model.addAttribute("reviewFormDto", reviewDto);
+            return "reviews/editReviewForm";
+        } catch (EntityNotFoundException e) {
+            // 리뷰를 찾지 못했을 경우 예외 처리
+            model.addAttribute("errorMessage", "리뷰를 찾을 수 없습니다.");
+            return "error/404";
+        }
     }
 
     // 리뷰 수정
@@ -89,17 +101,20 @@ public class ReviewController {
                                Model model) {
         if (bindingResult.hasErrors()) {
             model.addAttribute("reviewFormDto", reviewFormDto);
-            return "reviews/editReviewForm";  // 입력 오류가 있을 경우 다시 폼을 보여줌
+            return "reviews/editReviewForm";
         }
         try {
             String email = getEmailFromPrincipal(userDetails, customOAuth2User);
             AbstractUser user = userService.getUserByEmail(email);
+
             if (!user.getId().equals(reviewFormDto.getUserId())) {
                 throw new IllegalStateException("Unauthorized attempt to update review");
             }
+
             reviewService.updateReview(reviewFormDto, reviewImages);
             return "redirect:/reviews/details/" + reviewId;
         } catch (Exception e) {
+            e.printStackTrace(); // 예외 메시지를 콘솔에 출력하여 확인
             redirectAttributes.addFlashAttribute("error", "리뷰 수정 중 오류가 발생했습니다: " + e.getMessage());
             return "redirect:/reviews/" + reviewId + "/edit";
         }

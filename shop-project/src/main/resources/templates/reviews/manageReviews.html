@@ -49,12 +49,10 @@
             });
         </script>
     </th:block>
-
 </head>
+
 <body>
-
 <div layout:fragment="content">
-
     <h1>리뷰 관리</h1>
     <div th:each="item : ${itemsEligibleForReview}">
         <p th:text="'reviewStatus: ' + ${item.reviewStatus}"></p>
@@ -65,17 +63,16 @@
         <p>구매 날짜: <span th:text="${item.orderDate}">구매 날짜</span></p>
         <p>가격: <span th:text="${item.price}">가격</span>원</p>
 
-        <!-- 리뷰 작성, 수정, 삭제 버튼 -->
-        <div th:if="${item.reviewStatus.equals('NOT_REVIEWED')}">
-            <a th:href="@{|/reviews/new?orderItemId=${item.orderItemId}|}" class="btn btn-primary">리뷰 작성</a>
-        </div>
-        <div th:if="${item.reviewStatus.equals('REVIEWED')}">
-            <a th:href="@{|/reviews/details/${item.orderItemId}|}" class="btn btn-secondary">리뷰 상세정보</a>
-            <a th:href="@{|/reviews/${item.orderItemId}/edit|}" class="btn btn-primary">리뷰 수정</a>
-            <form th:action="@{|/reviews/${item.orderItemId}/delete|}" method="post" style="display:inline;">
-                <button type="submit" class="btn btn-danger">리뷰 삭제</button>
-            </form>
-        </div>
+        <a th:if="${item.reviewStatus.name() == 'NOT_REVIEWED'}"
+           th:href="@{|/reviews/new?orderItemId=${item.orderItemId}|}" class="btn btn-primary">리뷰 작성</a>
+        <a th:if="${item.reviewStatus.name() == 'REVIEWED'}"
+           th:href="@{|/reviews/details/${item.reviewId}|}" class="btn btn-secondary">리뷰 상세정보</a>
+        <a th:if="${item.reviewStatus.name() == 'REVIEWED'}"
+           th:href="@{|/reviews/${item.reviewId}/edit|}" class="btn btn-primary">리뷰 수정</a>
+        <form th:if="${item.reviewStatus.name() == 'REVIEWED'}"
+              th:action="@{|/reviews/${item.reviewId}/delete|}" method="post" style="display:inline;">
+            <button type="submit" class="btn btn-danger">리뷰 삭제</button>
+        </form>
     </div>
 
     <!-- 페이지 네비게이션 -->

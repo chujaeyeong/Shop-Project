@@ -21,58 +21,114 @@
             border-radius: 0.25rem;
             transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
         }
+
         .btn-primary {
             color: #fff;
             background-color: #007bff;
             border-color: #007bff;
         }
+
         .btn-secondary {
             color: #fff;
             background-color: #6c757d;
             border-color: #6c757d;
         }
+
         .btn-danger {
             color: #fff;
             background-color: #dc3545;
             border-color: #dc3545;
         }
+
+        .badge-primary {
+            color: #fff;
+            background-color: #007bff;
+        }
+
+        .badge-secondary {
+            color: #fff;
+            background-color: #6c757d;
+        }
+
+        .item-divider {
+            border-bottom: 1px solid #ddd;
+            margin: 20px 0;
+        }
+
+        .review-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .review-item img {
+            margin-right: 20px;
+        }
+
+        .review-item-details {
+            flex-grow: 1;
+        }
+
+        .review-item-details p {
+            margin: 5px 0;
+        }
+
+        .review-buttons {
+            margin-top: 10px;
+        }
+
     </style>
 
     <!-- 사용자 스크립트 추가 -->
     <th:block layout:fragment="script">
         <script th:inline="javascript">
             $(document).ready(function () {
+                // 페이지 로드 시 로컬 스토리지의 메시지를 확인하여 알림 표시
+                var flashMessage = localStorage.getItem('flashMessage');
+                if (flashMessage) {
+                    alert(flashMessage);
+                    // 알림 표시 후 로컬 스토리지에서 메시지를 제거하여 중복 표시되지 않도록 함
+                    localStorage.removeItem('flashMessage');
+                }
+
                 var message = [[${message}]];
                 if (message) {
-                    alert(message);
+                    // 메시지를 로컬 스토리지에 저장하여 다음 페이지 로드 시 중복 표시되지 않도록 함
+                    localStorage.setItem('flashMessage', message);
                 }
             });
         </script>
     </th:block>
+
 </head>
 
 <body>
 <div layout:fragment="content">
     <h1>리뷰 관리</h1>
-    <div th:each="item : ${itemsEligibleForReview}">
-        <p th:text="'reviewStatus: ' + ${item.reviewStatus}"></p>
-        <div>
-            <img th:src="${item.imgUrl}" alt="Item Image" style="width: 100px; height: 100px;"/>
+    <div th:each="item : ${itemsEligibleForReview}" class="review-item">
+        <img th:src="${item.imgUrl}" alt="Item Image" style="width: 170px; height: 170px;"/>
+        <div class="review-item-details">
+            <div>
+                <span th:if="${item.reviewStatus.name() == 'NOT_REVIEWED'}" class="badge badge-primary">리뷰 작성 전</span>
+                <span th:if="${item.reviewStatus.name() == 'REVIEWED'}" class="badge badge-secondary">리뷰 작성 완료</span>
+            </div>
+            <p>상품 이름: <span th:text="${item.itemName}">상품 이름</span></p>
+            <p>구매 날짜: <span th:text="${#temporals.format(item.orderDate, 'yyyy년 MM월 dd일 HH시 mm분')}">구매 날짜</span></p>
+            <p>가격: <span th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT')}">가격</span>원</p>
+            <div class="review-buttons">
+                <a th:if="${item.reviewStatus.name() == 'NOT_REVIEWED'}"
+                   th:href="@{|/reviews/new?orderItemId=${item.orderItemId}|}" class="btn btn-primary">리뷰 작성</a>
+                <a th:if="${item.reviewStatus.name() == 'REVIEWED'}"
+                   th:href="@{|/reviews/details/${item.reviewId}|}" class="btn btn-secondary">리뷰 상세정보</a>
+                <a th:if="${item.reviewStatus.name() == 'REVIEWED'}"
+                   th:href="@{|/reviews/${item.reviewId}/edit|}" class="btn btn-primary">리뷰 수정</a>
+                <form th:if="${item.reviewStatus.name() == 'REVIEWED'}"
+                      th:action="@{|/reviews/${item.reviewId}/delete|}" method="post" style="display:inline;">
+                    <button type="submit" class="btn btn-danger">리뷰 삭제</button>
+                </form>
+            </div>
         </div>
-        <p>상품 이름: <span th:text="${item.itemName}">상품 이름</span></p>
-        <p>구매 날짜: <span th:text="${item.orderDate}">구매 날짜</span></p>
-        <p>가격: <span th:text="${item.price}">가격</span>원</p>
-
-        <a th:if="${item.reviewStatus.name() == 'NOT_REVIEWED'}"
-           th:href="@{|/reviews/new?orderItemId=${item.orderItemId}|}" class="btn btn-primary">리뷰 작성</a>
-        <a th:if="${item.reviewStatus.name() == 'REVIEWED'}"
-           th:href="@{|/reviews/details/${item.reviewId}|}" class="btn btn-secondary">리뷰 상세정보</a>
-        <a th:if="${item.reviewStatus.name() == 'REVIEWED'}"
-           th:href="@{|/reviews/${item.reviewId}/edit|}" class="btn btn-primary">리뷰 수정</a>
-        <form th:if="${item.reviewStatus.name() == 'REVIEWED'}"
-              th:action="@{|/reviews/${item.reviewId}/delete|}" method="post" style="display:inline;">
-            <button type="submit" class="btn btn-danger">리뷰 삭제</button>
-        </form>
+        <div class="item-divider"></div>
     </div>
 
     <!-- 페이지 네비게이션 -->

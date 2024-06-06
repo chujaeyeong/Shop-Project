@@ -170,4 +170,20 @@ public class ReviewService {
         return new PageImpl<>(reviewItemDtos.subList(start, end), pageable, reviewItemDtos.size());
     }
 
+    // 리뷰 리스트 조회 (상품 상세보기에 사용)
+    public List<ReviewFormDto> getReviewsByItemId(Long itemId) {
+        List<Review> reviews = reviewRepository.findByItemId(itemId);
+        return reviews.stream().map(ReviewFormDto::fromReview).collect(Collectors.toList());
+    }
+
+    // 리뷰 상세정보 조회 (상품 상세보기에 사용)
+    public ReviewFormDto getReviewDetailsById(Long reviewId) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new EntityNotFoundException("Review not found with ID: " + reviewId));
+        List<ReviewImgDto> reviewImgDtos = reviewImgService.getReviewImages(reviewId);
+        ReviewFormDto reviewFormDto = ReviewFormDto.fromReview(review);
+        reviewFormDto.setReviewImgDtoList(reviewImgDtos);
+        return reviewFormDto;
+    }
+
 }

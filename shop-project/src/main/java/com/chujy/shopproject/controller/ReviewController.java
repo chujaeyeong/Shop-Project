@@ -124,7 +124,8 @@ public class ReviewController {
     @PostMapping("/{reviewId}/delete")
     public String deleteReview(@PathVariable Long reviewId,
                                @AuthenticationPrincipal UserDetails userDetails,
-                               @AuthenticationPrincipal CustomOAuth2User customOAuth2User) {
+                               @AuthenticationPrincipal CustomOAuth2User customOAuth2User,
+                               RedirectAttributes redirectAttributes) {
         ReviewFormDto review = reviewService.getReviewDetails(reviewId);
         String email = getEmailFromPrincipal(userDetails, customOAuth2User);
         AbstractUser user = userService.getUserByEmail(email);
@@ -132,6 +133,7 @@ public class ReviewController {
             throw new IllegalStateException("Unauthorized attempt to delete review");
         }
         reviewService.deleteReview(reviewId);
+        redirectAttributes.addFlashAttribute("message", "리뷰가 성공적으로 삭제되었습니다.");
         return "redirect:/reviews/manage";
     }
 
@@ -165,6 +167,20 @@ public class ReviewController {
             return customOAuth2User.getEmail();
         }
         throw new IllegalStateException("인증된 사용자 정보가 존재하지 않습니다.");
+    }
+
+    // 리뷰 리스트를 상품 상세보기 페이지에 로드
+    @GetMapping("/item/{itemId}")
+    @ResponseBody
+    public List<ReviewFormDto> getItemReviews(@PathVariable Long itemId) {
+        return reviewService.getReviewsByItemId(itemId);
+    }
+
+    // 각 리뷰의 상세 정보를 상품 상세보기 페이지에 로드
+    @GetMapping("/ajax/details/{reviewId}")
+    @ResponseBody
+    public ReviewFormDto getReviewDetailsAjax(@PathVariable Long reviewId) {
+        return reviewService.getReviewDetailsById(reviewId);
     }
 
 }

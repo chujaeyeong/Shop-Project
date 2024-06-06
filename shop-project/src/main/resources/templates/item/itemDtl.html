@@ -12,11 +12,18 @@
 <th:block layout:fragment="script">
     <script th:inline="javascript">
         $(document).ready(function () {
-
             calculateTotalPrice();
 
             $("#count").change(function () {
                 calculateTotalPrice();
+            });
+
+            loadReviews();
+
+            // 리뷰 상세보기 클릭 이벤트 핸들러
+            $(document).on('click', '.review-summary', function () {
+                var reviewId = $(this).data('review-id');
+                loadReviewDetails(reviewId);
             });
         });
 
@@ -107,6 +114,61 @@
             });
         }
 
+        function loadReviews() {
+            var itemId = $("#itemId").val();
+            $.ajax({
+                url: '/reviews/item/' + itemId,
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    var reviewsHtml = '';
+                    var totalRating = 0;
+
+                    data.forEach(function (review) {
+                        totalRating += review.rating;
+                        reviewsHtml += `
+                            <div class="review-summary" data-review-id="${review.id}">
+                                <p><strong>${review.userName}</strong> (${review.rating}점)</p>
+                                <p>${review.content}</p>
+                            </div>
+                        `;
+                    });
+
+                    var averageRating = (data.length > 0) ? (totalRating / data.length).toFixed(2) : 0;
+
+                    $('#reviewList').html(reviewsHtml);
+                    $('#averageRating').text(averageRating);
+                },
+                error: function (jqXHR, status, error) {
+                    console.error('리뷰를 불러오는 중 오류 발생:', error);
+                }
+            });
+        }
+
+        function loadReviewDetails(reviewId) {
+            $.ajax({
+                url: '/reviews/ajax/details/' + reviewId,
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    var reviewDetailsHtml = `
+                        <h4>${data.userName}</h4>
+                        <p>${data.content}</p>
+                        <p>평점: ${data.rating}</p>
+                        <div>
+                            ${data.reviewImgDtoList.map(img => `<img src="${img.imgUrl}" alt="${img.oriImgName}" style="max-width: 100px; margin-right: 5px;">`).join('')}
+                        </div>
+                    `;
+
+                    $('#reviewDetails').html(reviewDetailsHtml);
+                    $('#reviewModal').modal('show');
+                },
+                error: function (jqXHR, status, error) {
+                    console.error('리뷰 상세 정보를 불러오는 중 오류 발생:', error);
+                }
+            });
+        }
+
     </script>
 </th:block>
 
@@ -139,6 +201,16 @@
         .wd50 {
             height: auto;
             width: 50%;
+        }
+
+        .review-summary {
+            border-bottom: 1px solid #ddd;
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        .review-summary:hover {
+            background-color: #f0f0f0;
         }
     </style>
 </th:block>
@@ -205,6 +277,35 @@
     <div th:each="itemImg : ${item.itemImgDtoList}" class="text-center">
         <img th:if="${not #strings.isEmpty(itemImg.imgUrl)}" th:src="${itemImg.imgUrl}" class="rounded mgb-15"
              width="800">
+    </div>
+
+    <!-- 리뷰 섹션 추가 -->
+    <div class="mgt-50">
+        <h4>리뷰</h4>
+        <div>
+            <strong>평균 평점:</strong> <span id="averageRating"></span>
+        </div>
+        <div id="reviewList"></div>
+    </div>
+
+    <!-- 리뷰 상세보기 모달 -->
+    <div id="reviewModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">리뷰 상세 정보</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="reviewDetails">
+                    <!-- 리뷰 상세 내용이 AJAX로 로드됨 -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
+                </div>
+            </div>
+        </div>
     </div>
 
 </div>

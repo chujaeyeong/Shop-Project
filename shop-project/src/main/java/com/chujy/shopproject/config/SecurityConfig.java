@@ -48,6 +48,7 @@ public class SecurityConfig {
                     .requestMatchers("/favicon.ico", "/error").permitAll()
                     .requestMatchers("/css/**", "/js/**", "/img/**").permitAll()
                     .requestMatchers("/", "/members/**", "/item/**", "/images/**").permitAll()
+                    .requestMatchers("/reviews/item/**", "/reviews/ajax/details/**").permitAll()
                     .requestMatchers("/admin/**").hasAnyAuthority("ROLE_ADMIN")
                     .anyRequest().authenticated();
         });

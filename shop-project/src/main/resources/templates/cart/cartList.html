@@ -6,6 +6,7 @@
 <head>
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title>장바구니</title>
 </head>
 
 <!-- 사용자 스크립트 추가 -->
@@ -19,6 +20,11 @@
             });
         });
 
+        // 숫자를 천 단위로 콤마를 찍는 함수
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+
         function getOrderTotalPrice() {
             var orderTotalPrice = 0;
             $("input[name=cartChkBox]:checked").each(function () {
@@ -28,7 +34,7 @@
                 orderTotalPrice += price * count;
             });
 
-            $("#orderTotalPrice").html(orderTotalPrice + '원');
+            $("#orderTotalPrice").html(formatNumber(orderTotalPrice) + '원');
         }
 
         function changeCount(obj) {
@@ -36,7 +42,7 @@
             var cartItemId = obj.id.split('_')[1];
             var price = $("#price_" + cartItemId).data("price");
             var totalPrice = count * price;
-            $("#totalPrice_" + cartItemId).html(totalPrice + "원");
+            $("#totalPrice_" + cartItemId).html(formatNumber(totalPrice) + "원");
             getOrderTotalPrice();
             updateCartItemCount(cartItemId, count);
         }
@@ -162,7 +168,6 @@
         }
 
     </script>
-
 </th:block>
 
 <!-- 사용자 CSS 추가 -->
@@ -234,7 +239,7 @@
                             <span class="input-group mt-2">
                                 <span th:id="'price_' + ${cartItem.cartItemId}"
                                       th:data-price="${cartItem.price}"
-                                      th:text="${cartItem.price} + '원'" class="align-self-center mr-2">
+                                      th:text="${#numbers.formatDecimal(cartItem.price, 0, 'COMMA', 0, 'POINT')} + '원'" class="align-self-center mr-2">
                                 </span>
                                 <input type="number" name="count" th:id="'count_' + ${cartItem.cartItemId}"
                                        th:value="${cartItem.count}" min="1"
@@ -249,7 +254,7 @@
                 </td>
                 <td class="text-center align-middle">
                     <span th:id="'totalPrice_' + ${cartItem.cartItemId}"
-                          name="totalPrice" th:text="${cartItem.price * cartItem.count} + '원'">
+                          name="totalPrice" th:text="${#numbers.formatDecimal(cartItem.price * cartItem.count, 0, 'COMMA', 0, 'POINT')} + '원'">
                     </span>
                 </td>
             </tr>

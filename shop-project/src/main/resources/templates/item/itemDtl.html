@@ -6,6 +6,7 @@
 <head>
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title th:text="'상세정보 - ' + ${item.itemName}">상품 상세 정보</title>
 </head>
 
 <!-- 사용자 스크립트 추가 -->
@@ -238,7 +239,7 @@
             <div class="text-right">
                 <div class="h4 text-danger text-left">
                     <input type="hidden" th:value="${item.price}" id="price" name="price">
-                    <span th:text="${item.price}"></span>원
+                    <span th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT')}"></span>원
                 </div>
                 <div class="input-group w-50">
                     <div class="input-group-prepend">

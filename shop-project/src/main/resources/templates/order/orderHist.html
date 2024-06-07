@@ -6,6 +6,7 @@
 <head>
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title>구매이력</title>
 </head>
 
 <!-- 사용자 스크립트 추가 -->
@@ -119,7 +120,7 @@
                 <div class="align-self-center w-75">
                     <span th:text="${orderItem.itemName}" class="fs24 font-weight-bold"></span>
                     <div class="fs18 font-weight-light">
-                        <span th:text="${orderItem.orderPrice} +'원'"></span>
+                        <span th:text="${#numbers.formatDecimal(orderItem.orderPrice, 0, 'COMMA', 0, 'POINT')} +'원'"></span>
                         <span th:text="${orderItem.count} +'개'"></span>
                     </div>
                 </div>

@@ -2,6 +2,10 @@
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{layouts/layout1}">
+<head>
+    <meta charset="UTF-8">
+    <title>Shopping Mall Website</title>
+</head>
 
 <!-- 사용자 CSS 추가 -->
 <th:block layout:fragment="css">
@@ -65,7 +69,7 @@
                         <div class="card-body">
                             <h4 class="card-title">[[${item.itemName}]]</h4>
                             <p class="card-text">[[${item.itemDetail}]]</p>
-                            <h3 class="card-title text-danger">[[${item.price}]]원</h3>
+                            <h3 class="card-title text-danger">[[${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT')}]]원</h3>
                         </div>
                     </a>
                 </div>

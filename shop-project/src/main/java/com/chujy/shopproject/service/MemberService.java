@@ -4,6 +4,7 @@ import com.chujy.shopproject.config.security.CustomUserDetails;
 import com.chujy.shopproject.domain.Member;
 import com.chujy.shopproject.dto.MemberFormDto;
 import com.chujy.shopproject.repository.MemberRepository;
+import com.chujy.shopproject.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,6 +22,7 @@ import java.util.Collections;
 public class MemberService implements UserDetailsService {
 
     private final MemberRepository memberRepository;
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
 
@@ -31,8 +33,7 @@ public class MemberService implements UserDetailsService {
 
     // 이미 가입한 회원일 경우 예외 발생
     private void validateDuplicateMember(Member member) {
-        Member findMember = memberRepository.findByEmail(member.getEmail());
-        if (findMember != null) {
+        if (userRepository.existsByEmail(member.getEmail())) {
             throw new IllegalStateException("이미 가입된 회원입니다.");
         }
     }

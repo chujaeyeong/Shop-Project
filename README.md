@@ -39,6 +39,8 @@
 
 ## 4. ERD
 
+<img width="900" alt="Shop-Project ERD" src="https://github.com/chujaeyeong/Shop-Project/assets/123634960/d4f924aa-d866-42e7-9b2b-a26d67978273">
+
 <br>
 <br>
 
